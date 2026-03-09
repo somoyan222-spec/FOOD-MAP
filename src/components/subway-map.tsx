@@ -68,7 +68,14 @@ export default function SubwayMap({
   // 选择搜索结果
   const handleSelectSearchResult = (result: SearchResult) => {
     setSelectedLineId(result.line.id);
-    onStationSelect(result.station);
+    const data = storage.getData();
+    const latestLine = data.lines.find(l => l.id === result.line.id);
+    const latestStation = latestLine?.stations.find(s => s.id === result.station.id);
+    if (latestStation) {
+      onStationSelect(latestStation);
+    } else {
+      onStationSelect(result.station);
+    }
     setShowSearchResults(false);
     setSearchQuery("");
   };
@@ -347,7 +354,16 @@ export default function SubwayMap({
                       stroke={selectedLine.color}
                       strokeWidth={isSelected ? 6 : 4}
                       className="cursor-pointer transition-all hover:r-16"
-                      onClick={() => onStationSelect(station)}
+                      onClick={() => {
+                        const data = storage.getData();
+                        const latestLine = data.lines.find(l => l.id === selectedLine.id);
+                        const latestStation = latestLine?.stations.find(s => s.id === station.id);
+                        if (latestStation) {
+                          onStationSelect(latestStation);
+                        } else {
+                          onStationSelect(station);
+                        }
+                      }}
                     />
 
                     {/* 美食标记 */}
