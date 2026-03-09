@@ -1,16 +1,5 @@
-﻿// 缇庨鍒嗙被鏋氫妇
 // 美食分类枚举
 export type FoodCategory =
-  | "蹇"
-  | "姝ｉ"
-  | "灏忓悆"
-  | "濂惰尪"
-  | "鍜栧暋"
-  | "鐢滃搧"
-  | "鐑х儰"
-  | "鐏攨"
-  | "閰掑惂"
-  | "鍏朵粬";
   | "快餐"
   | "正餐"
   | "小吃"
@@ -22,15 +11,8 @@ export type FoodCategory =
   | "酒吧"
   | "其他";
 
-// 浠锋牸鍖洪棿绫诲瀷
 // 价格区间类型
 export type PriceRange =
-  | "30鍏冧互涓?
-  | "30-50鍏?
-  | "50-100鍏?
-  | "100-150鍏?
-  | "100-200鍏?
-  | "200鍏冧互涓?;
   | "30元以下"
   | "30-50元"
   | "50-100元"
@@ -38,36 +20,29 @@ export type PriceRange =
   | "100-200元"
   | "200元以上";
 
-// 缇庨淇℃伅
 // 美食信息
 export interface FoodItem {
   id: string;
   stationId: string;
   name: string;
-  rating: number;
   rating: number; // 1-5星
   category: FoodCategory;
   priceRange: PriceRange;
   recommendedDish: string;
   remarks: string;
-  distance: number;
   distance: number; // 米
 }
 
-// 鍦伴搧绔欑偣
 // 地铁站点（规则布局位置）
 export interface SubwayStation {
   id: string;
   name: string;
   lineId: string;
-  x: number;
-  y: number;
   x: number; // SVG坐标 X
   y: number; // SVG坐标 Y
   foods: FoodItem[];
 }
 
-// 鍦伴搧绾胯矾
 // 地铁线路
 export interface SubwayLine {
   id: string;
@@ -76,7 +51,6 @@ export interface SubwayLine {
   stations: SubwayStation[];
 }
 
-// 搴旂敤鏁版嵁缁撴瀯
 // 应用数据结构
 export interface AppData {
   version?: string;

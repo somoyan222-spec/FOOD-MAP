@@ -104,6 +104,7 @@ export default function Home() {
             selectedStation={selectedStation}
             onStationSelect={handleStationSelect}
             onStationDeselect={handleStationDeselect}
+            onDataChange={handleDataChange}
           />
         </div>
       </div>

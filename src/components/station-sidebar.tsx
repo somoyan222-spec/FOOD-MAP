@@ -87,6 +87,9 @@ export default function StationSidebar({
         // 关闭表单
         setShowForm(false);
 
+        // 触发自定义事件通知其他组件数据已更新
+        window.dispatchEvent(new CustomEvent('food-data-changed'));
+
         // 通知父组件数据已更新
         onDataChange();
       }
@@ -122,6 +125,9 @@ export default function StationSidebar({
           setShowForm(false);
           setEditingFood(null);
 
+          // 触发自定义事件通知其他组件数据已更新
+          window.dispatchEvent(new CustomEvent('food-data-changed'));
+
           // 通知父组件数据已更新
           onDataChange();
         }
@@ -144,6 +150,10 @@ export default function StationSidebar({
           lineIndex
         ].stations[stationIndex].foods.filter((f) => f.id !== foodId);
         storage.saveData(data);
+
+        // 触发自定义事件通知其他组件数据已更新
+        window.dispatchEvent(new CustomEvent('food-data-changed'));
+
         onDataChange();
       }
     }

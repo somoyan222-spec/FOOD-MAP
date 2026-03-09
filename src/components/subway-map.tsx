@@ -9,6 +9,7 @@ interface SubwayMapProps {
   selectedStation: SubwayStation | null;
   onStationSelect: (station: SubwayStation) => void;
   onStationDeselect: () => void;
+  onDataChange?: () => void;
 }
 
 interface SearchResult {
@@ -20,9 +21,11 @@ export default function SubwayMap({
   selectedStation,
   onStationSelect,
   onStationDeselect,
+  onDataChange,
 }: SubwayMapProps) {
   const [lines, setLines] = useState<SubwayLine[]>([]);
   const [selectedLineId, setSelectedLineId] = useState<string>("");
+  const [dataVersion, setDataVersion] = useState(0);
   const [scale, setScale] = useState(1.0); // 默认缩放比例为100%
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -35,7 +38,7 @@ export default function SubwayMap({
     if (data.lines.length > 0 && !selectedLineId) {
       setSelectedLineId(data.lines[0].id);
     }
-  }, [selectedLineId]);
+  }, [selectedLineId, dataVersion]);
 
   const selectedLine = lines.find((line) => line.id === selectedLineId);
 
@@ -88,6 +91,31 @@ export default function SubwayMap({
     setSearchQuery("");
     setShowSearchResults(false);
   };
+
+  // 处理数据变化
+  useEffect(() => {
+    if (onDataChange) {
+      const originalHandler = onDataChange;
+      const wrappedHandler = () => {
+        setDataVersion(prev => prev + 1);
+        originalHandler();
+      };
+      return () => {};
+    }
+  }, [onDataChange]);
+
+  // 暴露数据更新方法
+  useEffect(() => {
+    if (onDataChange) {
+      const handleDataChange = () => {
+        setDataVersion(prev => prev + 1);
+      };
+      window.addEventListener('food-data-changed', handleDataChange);
+      return () => {
+        window.removeEventListener('food-data-changed', handleDataChange);
+      };
+    }
+  }, [onDataChange]);
 
   // 计算当前线路的边界，动态调整 viewBox（竖向展示）
   const getLineViewBox = () => {
