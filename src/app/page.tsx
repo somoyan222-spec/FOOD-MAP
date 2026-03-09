@@ -122,79 +122,56 @@ export default function Home() {
       <MemphisPattern />
       
       <div className="flex-1 flex flex-col relative z-10">
-        <header className="px-8 py-6">
+        <header className="px-4 py-4 md:px-8 md:py-6">
           <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-6">
+            <div className="flex items-center justify-between mb-6 md:mb-8">
+              <div className="flex items-center gap-3 md:gap-6">
                 <div 
-                  className="memphis-card p-4"
+                  className="memphis-card p-3 md:p-4"
                   style={{ 
                     background: "#FF6B6B", 
                     transform: "rotate(3deg)" 
                   }}
                 >
-                  <Sparkles size={40} style={{ color: "#FFF" }} />
+                  <Sparkles size={28} md={40} style={{ color: "#FFF" }} />
                 </div>
                 <div>
-                  <h1 className="memphis-title" style={{ fontSize: "36px" }}>
+                  <h1 className="memphis-title" style={{ fontSize: "24px", md: "36px" }}>
                     广州美食地图
                   </h1>
-                  <p className="memphis-subtitle">
+                  <p className="memphis-subtitle text-sm md:text-base">
                     探索城市美味，发现惊喜
                   </p>
                 </div>
               </div>
-              {isUsingFirebase && (
-                <div 
-                  className="memphis-card px-6 py-3"
-                  style={{ 
-                    background: "#98D9C2",
-                    transform: "rotate(-2deg)"
-                  }}
-                >
-                  <span className="font-bold text-sm uppercase tracking-wider">
-                    实时同步已启用
-                  </span>
-                </div>
-              )}
             </div>
 
-            <div className="memphis-divider mb-8"></div>
+            <div className="memphis-divider mb-6 md:mb-8"></div>
 
-            <div className="flex items-start gap-6 flex-wrap">
+            <div className="flex justify-center">
               <button
                 onClick={() => setShowAllFoods(true)}
-                className="memphis-card cursor-pointer"
+                className="memphis-card cursor-pointer w-full md:w-auto md:min-w-[300px]"
                 style={{ 
                   background: "#F7DC6F",
                   transform: "rotate(-1deg)",
-                  padding: "28px 40px"
+                  padding: "24px 32px"
                 }}
               >
                 <div className="flex flex-col items-center">
-                  <span className="text-sm font-bold uppercase tracking-wider mb-2 opacity-70">
+                  <span className="text-sm md:text-base font-bold uppercase tracking-wider mb-2 opacity-70">
                     美食总数
                   </span>
-                  <span className="text-5xl font-extrabold">
+                  <span className="text-4xl md:text-6xl font-extrabold">
                     {totalStats.totalFoods}
                   </span>
                 </div>
               </button>
-
-              <div className="flex flex-wrap gap-4">
-                <MemphisStatCard
-                  value={totalStats.avgRating}
-                  label="评分"
-                  color="#FF6B6B"
-                  rotation={1}
-                  icon={<Star size={24} />}
-                />
-              </div>
             </div>
           </div>
         </header>
 
-        <main className="flex-1 overflow-hidden px-8 pb-8">
+        <main className="flex-1 overflow-hidden px-4 pb-4 md:px-8 md:pb-8">
           <div 
             className="h-full memphis-card"
             style={{ 

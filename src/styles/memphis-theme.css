@@ -64,18 +64,6 @@ body {
   box-shadow: var(--shadow-memphis-lg);
 }
 
-.memphis-card::before {
-  content: '';
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  width: 20px;
-  height: 20px;
-  background: var(--memphis-yellow);
-  border: 2px solid var(--memphis-black);
-  border-radius: 50%;
-}
-
 .memphis-button {
   background: var(--memphis-coral);
   color: var(--memphis-white);
