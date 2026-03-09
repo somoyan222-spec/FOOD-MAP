@@ -7,9 +7,9 @@ import { firebaseStorage } from "@/lib/firebase-storage";
 import SubwayMap from "@/components/subway-map";
 import StationSidebar from "@/components/station-sidebar";
 import AllFoodsList from "@/components/all-foods-list";
-import { MinimalDogIcon } from "@/components/minimal-dog";
-import { MapPin, Star, Utensils, DollarSign, Edit2, Trash2 } from "lucide-react";
-import "@/styles/minimal-theme.css";
+import { MemphisPattern, MemphisStatCard } from "@/components/memphis-pattern";
+import { MapPin, Star, Utensils, Sparkles } from "lucide-react";
+import "@/styles/memphis-theme.css";
 
 export default function Home() {
   const [selectedStation, setSelectedStation] = useState<SubwayStation | null>(null);
@@ -103,100 +103,119 @@ export default function Home() {
 
   if (isLoading) {
     return (
-      <div className="minimal-loading">
-        <div className="text-center">
-          <div className="minimal-loading-spinner mx-auto mb-6"></div>
-          <p className="text-sm text-gray-500 tracking-wide">Loading</p>
+      <div className="flex h-screen items-center justify-center relative" style={{ background: "#FFF8E7" }}>
+        <MemphisPattern />
+        <div className="text-center relative z-10">
+          <div className="memphis-card p-8" style={{ background: "#98D9C2", transform: "rotate(-2deg)" }}>
+            <div className="animate-bounce-slow">
+              <Sparkles size={60} className="mx-auto mb-4" style={{ color: "#2C2C2C" }} />
+            </div>
+            <p className="text-2xl font-bold">Loading...</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-[#FAFAFA]">
-      <div className="flex-1 flex flex-col">
-        <header className="bg-white border-b border-gray-100 px-8 py-6">
+    <div className="flex h-screen relative" style={{ background: "#FFF8E7" }}>
+      <MemphisPattern />
+      
+      <div className="flex-1 flex flex-col relative z-10">
+        <header className="px-8 py-6">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-gray-50 rounded-xl">
-                  <MinimalDogIcon size={28} className="text-gray-800" />
+              <div className="flex items-center gap-6">
+                <div 
+                  className="memphis-card p-4"
+                  style={{ 
+                    background: "#FF6B6B", 
+                    transform: "rotate(3deg)" 
+                  }}
+                >
+                  <Sparkles size={40} style={{ color: "#FFF" }} />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
+                  <h1 className="memphis-title" style={{ fontSize: "36px" }}>
                     广州美食地图
                   </h1>
-                  <p className="text-sm text-gray-500 mt-1">
-                    探索城市美味
+                  <p className="memphis-subtitle">
+                    探索城市美味，发现惊喜
                   </p>
                 </div>
               </div>
               {isUsingFirebase && (
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                  <span className="font-medium">实时同步</span>
+                <div 
+                  className="memphis-card px-6 py-3"
+                  style={{ 
+                    background: "#98D9C2",
+                    transform: "rotate(-2deg)"
+                  }}
+                >
+                  <span className="font-bold text-sm uppercase tracking-wider">
+                    实时同步已启用
+                  </span>
                 </div>
               )}
             </div>
 
-            <div className="flex items-center gap-6">
+            <div className="memphis-divider mb-8"></div>
+
+            <div className="flex items-start gap-6 flex-wrap">
               <button
                 onClick={() => setShowAllFoods(true)}
-                className="minimal-card px-8 py-5 flex items-center gap-4 hover:cursor-pointer"
+                className="memphis-card cursor-pointer"
+                style={{ 
+                  background: "#F7DC6F",
+                  transform: "rotate(-1deg)",
+                  padding: "28px 40px"
+                }}
               >
-                <div className="flex flex-col">
-                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <div className="flex flex-col items-center">
+                  <span className="text-sm font-bold uppercase tracking-wider mb-2 opacity-70">
                     美食总数
                   </span>
-                  <span className="text-3xl font-semibold text-gray-900 mt-1">
+                  <span className="text-5xl font-extrabold">
                     {totalStats.totalFoods}
                   </span>
                 </div>
               </button>
 
-              <div className="flex items-center gap-4 flex-1">
-                <div className="minimal-card px-6 py-4 flex items-center gap-3">
-                  <div className="p-2 bg-gray-50 rounded-lg">
-                    <Utensils size={16} className="text-gray-600" />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-xs font-medium text-gray-500">线路</span>
-                    <span className="text-lg font-semibold text-gray-900">
-                      {totalStats.totalLines}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="minimal-card px-6 py-4 flex items-center gap-3">
-                  <div className="p-2 bg-gray-50 rounded-lg">
-                    <MapPin size={16} className="text-gray-600" />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-xs font-medium text-gray-500">站点</span>
-                    <span className="text-lg font-semibold text-gray-900">
-                      {totalStats.totalStations}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="minimal-card px-6 py-4 flex items-center gap-3">
-                  <div className="p-2 bg-gray-50 rounded-lg">
-                    <Star size={16} className="text-gray-600" />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-xs font-medium text-gray-500">评分</span>
-                    <span className="text-lg font-semibold text-gray-900">
-                      {totalStats.avgRating}
-                    </span>
-                  </div>
-                </div>
+              <div className="flex flex-wrap gap-4">
+                <MemphisStatCard
+                  value={totalStats.totalLines}
+                  label="线路"
+                  color="#98D9C2"
+                  rotation={2}
+                  icon={<Utensils size={24} />}
+                />
+                <MemphisStatCard
+                  value={totalStats.totalStations}
+                  label="站点"
+                  color="#C3B1E1"
+                  rotation={-1}
+                  icon={<MapPin size={24} />}
+                />
+                <MemphisStatCard
+                  value={totalStats.avgRating}
+                  label="评分"
+                  color="#FF6B6B"
+                  rotation={1}
+                  icon={<Star size={24} />}
+                />
               </div>
             </div>
           </div>
         </header>
 
-        <main className="flex-1 overflow-hidden bg-[#FAFAFA]">
-          <div className="h-full">
+        <main className="flex-1 overflow-hidden px-8 pb-8">
+          <div 
+            className="h-full memphis-card"
+            style={{ 
+              background: "rgba(255, 255, 255, 0.9)",
+              transform: "rotate(0.5deg)"
+            }}
+          >
             <SubwayMap
               selectedStation={selectedStation}
               onStationSelect={handleStationSelect}
