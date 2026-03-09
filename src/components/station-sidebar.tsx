@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { SubwayStation, FoodItem } from "@/types";
 import { storage } from "@/lib/data";
+import { firebaseStorage } from "@/lib/firebase-storage";
 import FoodCard from "./food-card";
 import FoodForm from "./food-form";
 import { Plus, X, MapPin } from "lucide-react";
@@ -24,8 +25,12 @@ export default function StationSidebar({
   const [showForm, setShowForm] = useState(false);
   const [editingFood, setEditingFood] = useState<FoodItem | null>(null);
   const [dataVersion, setDataVersion] = useState(0);
+  const [isUsingFirebase, setIsUsingFirebase] = useState(false);
 
-  // 从 storage 获取最新的站点数据
+  useEffect(() => {
+    setIsUsingFirebase(firebaseStorage.isAvailable());
+  }, []);
+
   const currentStation = useMemo(() => {
     if (!station) return null;
     const data = storage.getData();
@@ -33,7 +38,6 @@ export default function StationSidebar({
     return line?.stations.find(s => s.id === station.id) || station;
   }, [station, dataVersion]);
 
-  // 排序后的美食列表
   const foods = useMemo(() => {
     if (!currentStation) return [];
     
@@ -53,7 +57,6 @@ export default function StationSidebar({
     return sorted;
   }, [currentStation, sortBy]);
 
-  // 监听数据变化事件
   useEffect(() => {
     const handleDataChange = () => {
       setDataVersion(prev => prev + 1);
@@ -62,7 +65,6 @@ export default function StationSidebar({
     return () => window.removeEventListener('food-data-changed', handleDataChange);
   }, []);
 
-  // 当站点变化时重置状态
   useEffect(() => {
     if (station) {
       setShowForm(false);
@@ -72,7 +74,6 @@ export default function StationSidebar({
     }
   }, [station?.id]);
 
-  // 计算统计信息
   const stats = useMemo(() => {
     const stationFoods = currentStation?.foods || [];
     return {
@@ -85,94 +86,93 @@ export default function StationSidebar({
     };
   }, [currentStation]);
 
-  // 添加美食
-  const handleAddFood = (foodData: Omit<FoodItem, "id" | "stationId">) => {
+  const handleAddFood = async (foodData: Omit<FoodItem, "id" | "stationId">) => {
     const newFood: FoodItem = {
       ...foodData,
       id: `food-${Date.now()}`,
       stationId: station!.id,
     };
 
-    const data = storage.getData();
-    const lineIndex = data.lines.findIndex((l) => l.id === station!.lineId);
-    if (lineIndex >= 0) {
-      const stationIndex = data.lines[lineIndex].stations.findIndex(
-        (s) => s.id === station!.id
-      );
-      if (stationIndex >= 0) {
-        data.lines[lineIndex].stations[stationIndex].foods.push(newFood);
-        storage.saveData(data);
-
-        // 关闭表单
-        setShowForm(false);
-
-        // 触发自定义事件通知其他组件数据已更新
-        window.dispatchEvent(new CustomEvent('food-data-changed'));
-
-        // 通知父组件数据已更新
-        onDataChange();
-      }
-    }
-  };
-
-  // 编辑美食
-  const handleEditFood = (foodData: Omit<FoodItem, "id" | "stationId">) => {
-    if (!editingFood) return;
-
-    const data = storage.getData();
-    const lineIndex = data.lines.findIndex((l) => l.id === station!.lineId);
-    if (lineIndex >= 0) {
-      const stationIndex = data.lines[lineIndex].stations.findIndex(
-        (s) => s.id === station!.id
-      );
-      if (stationIndex >= 0) {
-        const foodIndex = data.lines[lineIndex].stations[
-          stationIndex
-        ].foods.findIndex((f) => f.id === editingFood.id);
-        if (foodIndex >= 0) {
-          data.lines[lineIndex].stations[stationIndex].foods[foodIndex] = {
-            ...foodData,
-            id: editingFood.id,
-            stationId: station!.id,
-          };
+    if (isUsingFirebase) {
+      await firebaseStorage.addFood(station!.lineId, station!.id, newFood);
+    } else {
+      const data = storage.getData();
+      const lineIndex = data.lines.findIndex((l) => l.id === station!.lineId);
+      if (lineIndex >= 0) {
+        const stationIndex = data.lines[lineIndex].stations.findIndex(
+          (s) => s.id === station!.id
+        );
+        if (stationIndex >= 0) {
+          data.lines[lineIndex].stations[stationIndex].foods.push(newFood);
           storage.saveData(data);
-
-          // 关闭表单并清空编辑状态
-          setShowForm(false);
-          setEditingFood(null);
-
-          // 触发自定义事件通知其他组件数据已更新
-          window.dispatchEvent(new CustomEvent('food-data-changed'));
-
-          // 通知父组件数据已更新
-          onDataChange();
         }
       }
     }
+
+    setShowForm(false);
+    window.dispatchEvent(new CustomEvent('food-data-changed'));
+    onDataChange();
   };
 
-  // 删除美食
-  const handleDeleteFood = (foodId: string) => {
-    if (!confirm("确定要删除这个美食吗？")) return;
+  const handleEditFood = async (foodData: Omit<FoodItem, "id" | "stationId">) => {
+    if (!editingFood) return;
 
-    const data = storage.getData();
-    const lineIndex = data.lines.findIndex((l) => l.id === station!.lineId);
-    if (lineIndex >= 0) {
-      const stationIndex = data.lines[lineIndex].stations.findIndex(
-        (s) => s.id === station!.id
-      );
-      if (stationIndex >= 0) {
-        data.lines[lineIndex].stations[stationIndex].foods = data.lines[
-          lineIndex
-        ].stations[stationIndex].foods.filter((f) => f.id !== foodId);
-        storage.saveData(data);
+    const updatedFood: FoodItem = {
+      ...foodData,
+      id: editingFood.id,
+      stationId: station!.id,
+    };
 
-        // 触发自定义事件通知其他组件数据已更新
-        window.dispatchEvent(new CustomEvent('food-data-changed'));
-
-        onDataChange();
+    if (isUsingFirebase) {
+      await firebaseStorage.updateFood(station!.lineId, station!.id, updatedFood);
+    } else {
+      const data = storage.getData();
+      const lineIndex = data.lines.findIndex((l) => l.id === station!.lineId);
+      if (lineIndex >= 0) {
+        const stationIndex = data.lines[lineIndex].stations.findIndex(
+          (s) => s.id === station!.id
+        );
+        if (stationIndex >= 0) {
+          const foodIndex = data.lines[lineIndex].stations[
+            stationIndex
+          ].foods.findIndex((f) => f.id === editingFood.id);
+          if (foodIndex >= 0) {
+            data.lines[lineIndex].stations[stationIndex].foods[foodIndex] = updatedFood;
+            storage.saveData(data);
+          }
+        }
       }
     }
+
+    setShowForm(false);
+    setEditingFood(null);
+    window.dispatchEvent(new CustomEvent('food-data-changed'));
+    onDataChange();
+  };
+
+  const handleDeleteFood = async (foodId: string) => {
+    if (!confirm("确定要删除这个美食吗？")) return;
+
+    if (isUsingFirebase) {
+      await firebaseStorage.deleteFood(station!.lineId, station!.id, foodId);
+    } else {
+      const data = storage.getData();
+      const lineIndex = data.lines.findIndex((l) => l.id === station!.lineId);
+      if (lineIndex >= 0) {
+        const stationIndex = data.lines[lineIndex].stations.findIndex(
+          (s) => s.id === station!.id
+        );
+        if (stationIndex >= 0) {
+          data.lines[lineIndex].stations[stationIndex].foods = data.lines[
+            lineIndex
+          ].stations[stationIndex].foods.filter((f) => f.id !== foodId);
+          storage.saveData(data);
+        }
+      }
+    }
+
+    window.dispatchEvent(new CustomEvent('food-data-changed'));
+    onDataChange();
   };
 
   if (!station || !currentStation) {
@@ -196,7 +196,6 @@ export default function StationSidebar({
 
   return (
     <div className="fixed inset-y-0 right-0 w-full md:w-[480px] bg-white shadow-2xl z-50 overflow-y-auto">
-      {/* 头部 */}
       <div className="sticky top-0 bg-white border-b px-6 py-4 z-10">
         <div className="flex items-center justify-between">
           <div>
@@ -214,7 +213,6 @@ export default function StationSidebar({
           </button>
         </div>
 
-        {/* 统计信息 */}
         <div className="grid grid-cols-3 gap-4 mt-4">
           <div className="bg-blue-50 rounded-lg p-3 text-center">
             <div className="text-2xl font-bold text-blue-600">{stats.count}</div>
@@ -231,7 +229,6 @@ export default function StationSidebar({
         </div>
       </div>
 
-      {/* 操作栏 */}
       <div className="px-6 py-4 border-b bg-gray-50">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -256,7 +253,6 @@ export default function StationSidebar({
         </div>
       </div>
 
-      {/* 美食列表 */}
       <div className="px-6 py-4">
         {foods.length === 0 ? (
           <div className="text-center py-16">

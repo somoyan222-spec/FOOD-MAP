@@ -364,24 +364,35 @@ export const initialData: AppData = {
   ],
 };
 
-// LocalStorage 管理
+// LocalStorage 管理（作为备选方案）
 const STORAGE_KEY = "food-map-data";
 
+// 检查是否配置了 Firebase
+const isFirebaseEnabled = (): boolean => {
+  return !!(
+    process.env.NEXT_PUBLIC_FIREBASE_API_KEY &&
+    process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL &&
+    process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
+  );
+};
+
 export const storage = {
+  isUsingFirebase(): boolean {
+    return isFirebaseEnabled();
+  },
+
   getData(): AppData {
     if (typeof window === "undefined") return initialData;
 
     try {
       const data = localStorage.getItem(STORAGE_KEY);
       if (!data) {
-        // 首次使用，初始化数据
         localStorage.setItem(STORAGE_KEY, JSON.stringify(initialData));
         return initialData;
       }
 
       const parsedData = JSON.parse(data) as AppData & { version?: string };
 
-      // 检查数据版本，如果版本不匹配则更新数据
       if (!parsedData.version || parsedData.version !== DATA_VERSION) {
         console.log("数据版本已更新，正在重置数据...");
         localStorage.setItem(STORAGE_KEY, JSON.stringify(initialData));
@@ -399,7 +410,6 @@ export const storage = {
     if (typeof window === "undefined") return;
 
     try {
-      // 保存时确保包含版本号
       const dataWithVersion = { ...data, version: DATA_VERSION };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(dataWithVersion));
     } catch (error) {
@@ -412,7 +422,6 @@ export const storage = {
 
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(initialData));
-      // 强制刷新页面以加载新数据
       window.location.reload();
     } catch (error) {
       console.error("重置数据失败:", error);
