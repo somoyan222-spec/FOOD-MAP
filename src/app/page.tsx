@@ -133,10 +133,10 @@ export default function Home() {
                     transform: "rotate(3deg)" 
                   }}
                 >
-                  <Sparkles size={28} md={40} style={{ color: "#FFF" }} />
+                  <Sparkles size={28} className="md:w-10 md:h-10" style={{ color: "#FFF" }} />
                 </div>
                 <div>
-                  <h1 className="memphis-title" style={{ fontSize: "24px", md: "36px" }}>
+                  <h1 className="memphis-title text-2xl md:text-4xl">
                     广州美食地图
                   </h1>
                   <p className="memphis-subtitle text-sm md:text-base">
