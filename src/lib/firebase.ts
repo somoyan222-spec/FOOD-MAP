@@ -4,34 +4,23 @@ import { getDatabase, Database } from "firebase/database";
 let app: FirebaseApp | null = null;
 let database: Database | null = null;
 
-// 获取环境变量（在函数内部调用，确保在客户端执行时获取）
-const getFirebaseConfig = () => ({
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-});
+// 硬编码 Firebase 配置（临时解决方案）
+const firebaseConfig = {
+  apiKey: "AIzaSyBwHUAw93e8yv4f3xMO08jfwv52h64C4w",
+  authDomain: "food-map-43a16.firebaseapp.com",
+  databaseURL: "https://food-map-43a16-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "food-map-43a16",
+  storageBucket: "food-map-43a16.firebasestorage.app",
+  messagingSenderId: "683873152380",
+  appId: "1:683873152380:web:565feb77ceecf08b5008f9",
+};
 
 export const isConfigured = () => {
-  const config = getFirebaseConfig();
-  const configured = !!(
-    config.apiKey &&
-    config.databaseURL &&
-    config.projectId
+  return !!(
+    firebaseConfig.apiKey &&
+    firebaseConfig.databaseURL &&
+    firebaseConfig.projectId
   );
-  
-  if (!configured) {
-    console.log("Firebase config check:", {
-      hasApiKey: !!config.apiKey,
-      hasDatabaseUrl: !!config.databaseURL,
-      hasProjectId: !!config.projectId,
-    });
-  }
-  
-  return configured;
 };
 
 export const getFirebase = () => {
@@ -39,21 +28,10 @@ export const getFirebase = () => {
     return { app: null, database: null };
   }
 
-  const config = getFirebaseConfig();
-
-  if (!config.apiKey || !config.databaseURL || !config.projectId) {
-    console.warn("Firebase not configured - missing environment variables:", {
-      apiKey: config.apiKey ? "✓" : "✗",
-      databaseURL: config.databaseURL ? "✓" : "✗",
-      projectId: config.projectId ? "✓" : "✗",
-    });
-    return { app: null, database: null };
-  }
-
   try {
     if (!app) {
       if (getApps().length === 0) {
-        app = initializeApp(config);
+        app = initializeApp(firebaseConfig);
         console.log("Firebase initialized successfully");
       } else {
         app = getApp();
@@ -75,7 +53,6 @@ export const getFirebase = () => {
 
 // 只在客户端初始化
 if (typeof window !== "undefined") {
-  // 延迟初始化，确保环境变量已加载
   setTimeout(() => {
     getFirebase();
   }, 0);
