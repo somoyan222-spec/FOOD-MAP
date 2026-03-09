@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { SubwayStation, FoodItem } from "@/types";
 import { storage } from "@/lib/data";
 import FoodCard from "./food-card";
 import FoodForm from "./food-form";
-import { Plus, X, ArrowUpDown, MapPin } from "lucide-react";
+import { Plus, X, MapPin } from "lucide-react";
 
 type SortOption = "default" | "rating-desc" | "rating-asc";
 
@@ -20,30 +20,24 @@ export default function StationSidebar({
   onClose,
   onDataChange,
 }: StationSidebarProps) {
-  const [foods, setFoods] = useState<FoodItem[]>([]);
   const [sortBy, setSortBy] = useState<SortOption>("default");
   const [showForm, setShowForm] = useState(false);
   const [editingFood, setEditingFood] = useState<FoodItem | null>(null);
+  const [dataVersion, setDataVersion] = useState(0);
 
-  useEffect(() => {
-    if (station) {
-      const data = storage.getData();
-      const line = data.lines.find(l => l.id === station.lineId);
-      const updatedStation = line?.stations.find(s => s.id === station.id);
-      if (updatedStation) {
-        setFoods(updatedStation.foods);
-      } else {
-        setFoods(station.foods);
-      }
-      setShowForm(false);
-      setEditingFood(null);
-      setSortBy("default");
-    }
-  }, [station]);
+  // 从 storage 获取最新的站点数据
+  const currentStation = useMemo(() => {
+    if (!station) return null;
+    const data = storage.getData();
+    const line = data.lines.find(l => l.id === station.lineId);
+    return line?.stations.find(s => s.id === station.id) || station;
+  }, [station, dataVersion]);
 
-  // 排序逻辑
-  useEffect(() => {
-    let sorted = [...foods];
+  // 排序后的美食列表
+  const foods = useMemo(() => {
+    if (!currentStation) return [];
+    
+    let sorted = [...currentStation.foods];
 
     switch (sortBy) {
       case "rating-desc":
@@ -56,18 +50,40 @@ export default function StationSidebar({
         break;
     }
 
-    setFoods(sorted);
-  }, [sortBy, foods.length]);
+    return sorted;
+  }, [currentStation, sortBy]);
+
+  // 监听数据变化事件
+  useEffect(() => {
+    const handleDataChange = () => {
+      setDataVersion(prev => prev + 1);
+    };
+    window.addEventListener('food-data-changed', handleDataChange);
+    return () => window.removeEventListener('food-data-changed', handleDataChange);
+  }, []);
+
+  // 当站点变化时重置状态
+  useEffect(() => {
+    if (station) {
+      setShowForm(false);
+      setEditingFood(null);
+      setSortBy("default");
+      setDataVersion(prev => prev + 1);
+    }
+  }, [station?.id]);
 
   // 计算统计信息
-  const stats = {
-    count: foods.length,
-    avgRating:
-      foods.length > 0
-        ? (foods.reduce((sum, f) => sum + f.rating, 0) / foods.length).toFixed(1)
-        : "0",
-    maxRating: foods.length > 0 ? Math.max(...foods.map((f) => f.rating)) : 0,
-  };
+  const stats = useMemo(() => {
+    const stationFoods = currentStation?.foods || [];
+    return {
+      count: stationFoods.length,
+      avgRating:
+        stationFoods.length > 0
+          ? (stationFoods.reduce((sum, f) => sum + f.rating, 0) / stationFoods.length).toFixed(1)
+          : "0",
+      maxRating: stationFoods.length > 0 ? Math.max(...stationFoods.map((f) => f.rating)) : 0,
+    };
+  }, [currentStation]);
 
   // 添加美食
   const handleAddFood = (foodData: Omit<FoodItem, "id" | "stationId">) => {
@@ -86,9 +102,6 @@ export default function StationSidebar({
       if (stationIndex >= 0) {
         data.lines[lineIndex].stations[stationIndex].foods.push(newFood);
         storage.saveData(data);
-
-        // 更新本地 foods state
-        setFoods([...data.lines[lineIndex].stations[stationIndex].foods]);
 
         // 关闭表单
         setShowForm(false);
@@ -123,9 +136,6 @@ export default function StationSidebar({
             stationId: station!.id,
           };
           storage.saveData(data);
-
-          // 更新本地 foods state
-          setFoods([...data.lines[lineIndex].stations[stationIndex].foods]);
 
           // 关闭表单并清空编辑状态
           setShowForm(false);
@@ -165,7 +175,7 @@ export default function StationSidebar({
     }
   };
 
-  if (!station) {
+  if (!station || !currentStation) {
     return null;
   }
 
@@ -194,7 +204,7 @@ export default function StationSidebar({
               <MapPin className="w-4 h-4" />
               <span>地铁站点</span>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900">{station.name}</h2>
+            <h2 className="text-2xl font-bold text-gray-900">{currentStation.name}</h2>
           </div>
           <button
             onClick={onClose}
