@@ -27,7 +27,14 @@ export default function StationSidebar({
 
   useEffect(() => {
     if (station) {
-      setFoods(station.foods);
+      const data = storage.getData();
+      const line = data.lines.find(l => l.id === station.lineId);
+      const updatedStation = line?.stations.find(s => s.id === station.id);
+      if (updatedStation) {
+        setFoods(updatedStation.foods);
+      } else {
+        setFoods(station.foods);
+      }
       setShowForm(false);
       setEditingFood(null);
       setSortBy("default");
@@ -46,12 +53,11 @@ export default function StationSidebar({
         sorted.sort((a, b) => a.rating - b.rating);
         break;
       default:
-        // 默认按添加顺序（不排序）
         break;
     }
 
     setFoods(sorted);
-  }, [sortBy, station?.foods]);
+  }, [sortBy, foods.length]);
 
   // 计算统计信息
   const stats = {

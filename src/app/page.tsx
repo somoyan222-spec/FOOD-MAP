@@ -35,6 +35,17 @@ export default function Home() {
     setDataVersion((prev) => prev + 1);
   };
 
+  useEffect(() => {
+    if (selectedStation) {
+      const updatedStation = lines
+        .flatMap(line => line.stations)
+        .find(s => s.id === selectedStation.id);
+      if (updatedStation && updatedStation !== selectedStation) {
+        setSelectedStation(updatedStation);
+      }
+    }
+  }, [lines]);
+
   // 计算所有线路的统计数据
   const totalStats = {
     totalLines: lines.length,
