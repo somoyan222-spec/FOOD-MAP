@@ -75,12 +75,15 @@
     "@types/pg": "^8.16.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "autoprefixer": "^10.4.20",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
     "only-allow": "^1.2.2",
+    "postcss": "^8.4.49",
     "react-dev-inspector": "^2.0.1",
     "shadcn": "latest",
     "tailwindcss": "^4",
+    "tailwindcss-animate": "^1.0.7",
     "typescript": "^5"
   }
 }
