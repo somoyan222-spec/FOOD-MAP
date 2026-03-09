@@ -92,6 +92,10 @@ export const firebaseStorage = {
       const stationIndex = data.lines[lineIndex].stations.findIndex(s => s.id === stationId);
       
       if (stationIndex >= 0) {
+        // 确保 foods 数组存在
+        if (!data.lines[lineIndex].stations[stationIndex].foods) {
+          data.lines[lineIndex].stations[stationIndex].foods = [];
+        }
         data.lines[lineIndex].stations[stationIndex].foods.push(food);
         await this.saveData(data);
         console.log("Food added successfully");
@@ -108,6 +112,10 @@ export const firebaseStorage = {
       const stationIndex = data.lines[lineIndex].stations.findIndex(s => s.id === stationId);
       
       if (stationIndex >= 0) {
+        // 确保 foods 数组存在
+        if (!data.lines[lineIndex].stations[stationIndex].foods) {
+          data.lines[lineIndex].stations[stationIndex].foods = [];
+        }
         const foodIndex = data.lines[lineIndex].stations[stationIndex].foods.findIndex(f => f.id === food.id);
         
         if (foodIndex >= 0) {
@@ -128,6 +136,10 @@ export const firebaseStorage = {
       const stationIndex = data.lines[lineIndex].stations.findIndex(s => s.id === stationId);
       
       if (stationIndex >= 0) {
+        // 确保 foods 数组存在
+        if (!data.lines[lineIndex].stations[stationIndex].foods) {
+          data.lines[lineIndex].stations[stationIndex].foods = [];
+        }
         data.lines[lineIndex].stations[stationIndex].foods = 
           data.lines[lineIndex].stations[stationIndex].foods.filter(f => f.id !== foodId);
         await this.saveData(data);
