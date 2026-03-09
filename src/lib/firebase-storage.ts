@@ -1,21 +1,37 @@
 import { ref, onValue, set, get, off } from "firebase/database";
-import { database, isConfigured } from "./firebase";
+import { database, isConfigured, initFirebase } from "./firebase";
 import { AppData, FoodItem } from "@/types";
 import { initialData, DATA_VERSION } from "./data";
 
 const DATA_REF = "foodMapData";
 
+// 获取数据库实例（确保已初始化）
+const getDatabaseInstance = () => {
+  if (typeof window === "undefined") {
+    return null;
+  }
+  if (!database) {
+    const initialized = initFirebase();
+    return initialized?.database || null;
+  }
+  return database;
+};
+
 export const firebaseStorage = {
   isAvailable(): boolean {
-    return isConfigured() && database !== null;
+    if (typeof window === "undefined") {
+      return false;
+    }
+    return isConfigured() && getDatabaseInstance() !== null;
   },
 
   async getData(): Promise<AppData> {
-    if (!database) {
+    const db = getDatabaseInstance();
+    if (!db) {
       return initialData;
     }
 
-    const dataRef = ref(database, DATA_REF);
+    const dataRef = ref(db, DATA_REF);
     const snapshot = await get(dataRef);
     
     if (!snapshot.exists()) {
@@ -34,12 +50,13 @@ export const firebaseStorage = {
   },
 
   subscribeToData(callback: (data: AppData) => void): () => void {
-    if (!database) {
+    const db = getDatabaseInstance();
+    if (!db) {
       callback(initialData);
       return () => {};
     }
 
-    const dataRef = ref(database, DATA_REF);
+    const dataRef = ref(db, DATA_REF);
     
     const unsubscribe = onValue(dataRef, (snapshot) => {
       if (snapshot.exists()) {
@@ -55,17 +72,19 @@ export const firebaseStorage = {
   },
 
   async saveData(data: AppData): Promise<void> {
-    if (!database) {
+    const db = getDatabaseInstance();
+    if (!db) {
       return;
     }
 
-    const dataRef = ref(database, DATA_REF);
+    const dataRef = ref(db, DATA_REF);
     const dataWithVersion = { ...data, version: DATA_VERSION };
     await set(dataRef, dataWithVersion);
   },
 
   async addFood(lineId: string, stationId: string, food: FoodItem): Promise<void> {
-    if (!database) {
+    const db = getDatabaseInstance();
+    if (!db) {
       return;
     }
 
@@ -83,7 +102,8 @@ export const firebaseStorage = {
   },
 
   async updateFood(lineId: string, stationId: string, food: FoodItem): Promise<void> {
-    if (!database) {
+    const db = getDatabaseInstance();
+    if (!db) {
       return;
     }
 
@@ -105,7 +125,8 @@ export const firebaseStorage = {
   },
 
   async deleteFood(lineId: string, stationId: string, foodId: string): Promise<void> {
-    if (!database) {
+    const db = getDatabaseInstance();
+    if (!db) {
       return;
     }
 
@@ -124,11 +145,12 @@ export const firebaseStorage = {
   },
 
   async resetData(): Promise<void> {
-    if (!database) {
+    const db = getDatabaseInstance();
+    if (!db) {
       return;
     }
 
-    const dataRef = ref(database, DATA_REF);
+    const dataRef = ref(db, DATA_REF);
     await set(dataRef, initialData);
   },
 };

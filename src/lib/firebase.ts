@@ -1,4 +1,4 @@
-import { initializeApp, FirebaseApp } from "firebase/app";
+import { initializeApp, FirebaseApp, getApps, getApp } from "firebase/app";
 import { getDatabase, Database } from "firebase/database";
 
 const firebaseConfig = {
@@ -22,13 +22,30 @@ const isConfigured = () => {
   );
 };
 
-if (typeof window !== "undefined" && isConfigured()) {
+const initFirebase = () => {
+  if (!isConfigured()) {
+    return null;
+  }
+
   try {
-    app = initializeApp(firebaseConfig);
+    // 检查是否已经初始化
+    if (getApps().length === 0) {
+      app = initializeApp(firebaseConfig);
+    } else {
+      app = getApp();
+    }
     database = getDatabase(app);
+    return { app, database };
   } catch (error) {
     console.warn("Firebase initialization failed:", error);
+    return null;
   }
+};
+
+// 在客户端初始化
+if (typeof window !== "undefined") {
+  initFirebase();
 }
 
-export { app, database, isConfigured };
+// 导出初始化函数，供服务端使用
+export { app, database, isConfigured, initFirebase };
