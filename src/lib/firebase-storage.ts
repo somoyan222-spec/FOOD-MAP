@@ -1,47 +1,41 @@
 import { ref, onValue, set, get, off } from "firebase/database";
-import { database, isConfigured, initFirebase } from "./firebase";
+import { getFirebase, isConfigured } from "./firebase";
 import { AppData, FoodItem } from "@/types";
 import { initialData, DATA_VERSION } from "./data";
 
 const DATA_REF = "foodMapData";
-
-// 获取数据库实例（确保已初始化）
-const getDatabaseInstance = () => {
-  if (typeof window === "undefined") {
-    return null;
-  }
-  if (!database) {
-    const initialized = initFirebase();
-    return initialized?.database || null;
-  }
-  return database;
-};
 
 export const firebaseStorage = {
   isAvailable(): boolean {
     if (typeof window === "undefined") {
       return false;
     }
-    return isConfigured() && getDatabaseInstance() !== null;
+    const { database } = getFirebase();
+    return database !== null;
   },
 
   async getData(): Promise<AppData> {
-    const db = getDatabaseInstance();
-    if (!db) {
+    const { database } = getFirebase();
+    if (!database) {
+      console.log("Firebase not available, returning initial data");
       return initialData;
     }
 
-    const dataRef = ref(db, DATA_REF);
+    console.log("Getting data from Firebase...");
+    const dataRef = ref(database, DATA_REF);
     const snapshot = await get(dataRef);
     
     if (!snapshot.exists()) {
+      console.log("No data in Firebase, initializing with default data");
       await set(dataRef, initialData);
       return initialData;
     }
     
     const data = snapshot.val() as AppData;
+    console.log("Got data from Firebase:", data);
     
     if (!data.version || data.version !== DATA_VERSION) {
+      console.log("Data version mismatch, resetting to default data");
       await set(dataRef, initialData);
       return initialData;
     }
@@ -50,19 +44,23 @@ export const firebaseStorage = {
   },
 
   subscribeToData(callback: (data: AppData) => void): () => void {
-    const db = getDatabaseInstance();
-    if (!db) {
+    const { database } = getFirebase();
+    if (!database) {
+      console.log("Firebase not available, using initial data");
       callback(initialData);
       return () => {};
     }
 
-    const dataRef = ref(db, DATA_REF);
+    console.log("Subscribing to Firebase data...");
+    const dataRef = ref(database, DATA_REF);
     
     const unsubscribe = onValue(dataRef, (snapshot) => {
+      console.log("Firebase data changed");
       if (snapshot.exists()) {
         const data = snapshot.val() as AppData;
         callback(data);
       } else {
+        console.log("No data in Firebase, setting default data");
         set(dataRef, initialData);
         callback(initialData);
       }
@@ -72,22 +70,21 @@ export const firebaseStorage = {
   },
 
   async saveData(data: AppData): Promise<void> {
-    const db = getDatabaseInstance();
-    if (!db) {
+    const { database } = getFirebase();
+    if (!database) {
+      console.log("Firebase not available, skipping save");
       return;
     }
 
-    const dataRef = ref(db, DATA_REF);
+    console.log("Saving data to Firebase...", data);
+    const dataRef = ref(database, DATA_REF);
     const dataWithVersion = { ...data, version: DATA_VERSION };
     await set(dataRef, dataWithVersion);
+    console.log("Data saved to Firebase successfully");
   },
 
   async addFood(lineId: string, stationId: string, food: FoodItem): Promise<void> {
-    const db = getDatabaseInstance();
-    if (!db) {
-      return;
-    }
-
+    console.log("Adding food to Firebase...", { lineId, stationId, food });
     const data = await this.getData();
     const lineIndex = data.lines.findIndex(l => l.id === lineId);
     
@@ -97,16 +94,13 @@ export const firebaseStorage = {
       if (stationIndex >= 0) {
         data.lines[lineIndex].stations[stationIndex].foods.push(food);
         await this.saveData(data);
+        console.log("Food added successfully");
       }
     }
   },
 
   async updateFood(lineId: string, stationId: string, food: FoodItem): Promise<void> {
-    const db = getDatabaseInstance();
-    if (!db) {
-      return;
-    }
-
+    console.log("Updating food in Firebase...", { lineId, stationId, food });
     const data = await this.getData();
     const lineIndex = data.lines.findIndex(l => l.id === lineId);
     
@@ -119,17 +113,14 @@ export const firebaseStorage = {
         if (foodIndex >= 0) {
           data.lines[lineIndex].stations[stationIndex].foods[foodIndex] = food;
           await this.saveData(data);
+          console.log("Food updated successfully");
         }
       }
     }
   },
 
   async deleteFood(lineId: string, stationId: string, foodId: string): Promise<void> {
-    const db = getDatabaseInstance();
-    if (!db) {
-      return;
-    }
-
+    console.log("Deleting food from Firebase...", { lineId, stationId, foodId });
     const data = await this.getData();
     const lineIndex = data.lines.findIndex(l => l.id === lineId);
     
@@ -140,17 +131,20 @@ export const firebaseStorage = {
         data.lines[lineIndex].stations[stationIndex].foods = 
           data.lines[lineIndex].stations[stationIndex].foods.filter(f => f.id !== foodId);
         await this.saveData(data);
+        console.log("Food deleted successfully");
       }
     }
   },
 
   async resetData(): Promise<void> {
-    const db = getDatabaseInstance();
-    if (!db) {
+    console.log("Resetting Firebase data...");
+    const { database } = getFirebase();
+    if (!database) {
       return;
     }
 
-    const dataRef = ref(db, DATA_REF);
+    const dataRef = ref(database, DATA_REF);
     await set(dataRef, initialData);
+    console.log("Firebase data reset successfully");
   },
 };

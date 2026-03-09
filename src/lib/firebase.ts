@@ -14,7 +14,7 @@ const firebaseConfig = {
 let app: FirebaseApp | null = null;
 let database: Database | null = null;
 
-const isConfigured = () => {
+export const isConfigured = () => {
   return !!(
     firebaseConfig.apiKey &&
     firebaseConfig.databaseURL &&
@@ -22,30 +22,39 @@ const isConfigured = () => {
   );
 };
 
-const initFirebase = () => {
+export const getFirebase = () => {
+  if (typeof window === "undefined") {
+    return { app: null, database: null };
+  }
+
   if (!isConfigured()) {
-    return null;
+    console.warn("Firebase not configured - missing environment variables");
+    return { app: null, database: null };
   }
 
   try {
-    // 检查是否已经初始化
-    if (getApps().length === 0) {
-      app = initializeApp(firebaseConfig);
-    } else {
-      app = getApp();
+    if (!app) {
+      if (getApps().length === 0) {
+        app = initializeApp(firebaseConfig);
+        console.log("Firebase initialized successfully");
+      } else {
+        app = getApp();
+        console.log("Firebase app already initialized");
+      }
     }
-    database = getDatabase(app);
+
+    if (!database && app) {
+      database = getDatabase(app);
+      console.log("Firebase database initialized");
+    }
+
     return { app, database };
   } catch (error) {
-    console.warn("Firebase initialization failed:", error);
-    return null;
+    console.error("Firebase initialization error:", error);
+    return { app: null, database: null };
   }
 };
 
-// 在客户端初始化
 if (typeof window !== "undefined") {
-  initFirebase();
+  getFirebase();
 }
-
-// 导出初始化函数，供服务端使用
-export { app, database, isConfigured, initFirebase };
