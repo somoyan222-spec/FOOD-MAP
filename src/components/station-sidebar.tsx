@@ -26,22 +26,42 @@ export default function StationSidebar({
   const [editingFood, setEditingFood] = useState<FoodItem | null>(null);
   const [dataVersion, setDataVersion] = useState(0);
   const [isUsingFirebase, setIsUsingFirebase] = useState(false);
+  const [currentFoods, setCurrentFoods] = useState<FoodItem[]>([]);
+  const [lineColor, setLineColor] = useState<string>('#f97316');
+  const [lineName, setLineName] = useState<string>('');
 
   useEffect(() => {
-    setIsUsingFirebase(firebaseStorage.isAvailable());
+    const available = firebaseStorage.isAvailable();
+    setIsUsingFirebase(available);
   }, []);
 
-  const currentStation = useMemo(() => {
-    if (!station) return null;
-    const data = storage.getData();
-    const line = data.lines.find(l => l.id === station.lineId);
-    return line?.stations.find(s => s.id === station.id) || station;
-  }, [station, dataVersion]);
+  // 获取当前站点的美食列表和线路信息
+  useEffect(() => {
+    const loadFoods = async () => {
+      if (!station) {
+        setCurrentFoods([]);
+        return;
+      }
+
+      let data;
+      if (isUsingFirebase) {
+        data = await firebaseStorage.getData();
+      } else {
+        data = storage.getData();
+      }
+
+      const line = data.lines.find(l => l.id === station.lineId);
+      const currentStation = line?.stations.find(s => s.id === station.id);
+      setCurrentFoods(currentStation?.foods || []);
+      setLineColor(line?.color || '#f97316');
+      setLineName(line?.name || '');
+    };
+
+    loadFoods();
+  }, [station, dataVersion, isUsingFirebase]);
 
   const foods = useMemo(() => {
-    if (!currentStation) return [];
-    
-    let sorted = [...currentStation.foods];
+    let sorted = [...currentFoods];
 
     switch (sortBy) {
       case "rating-desc":
@@ -55,7 +75,7 @@ export default function StationSidebar({
     }
 
     return sorted;
-  }, [currentStation, sortBy]);
+  }, [currentFoods, sortBy]);
 
   useEffect(() => {
     const handleDataChange = () => {
@@ -75,16 +95,15 @@ export default function StationSidebar({
   }, [station?.id]);
 
   const stats = useMemo(() => {
-    const stationFoods = currentStation?.foods || [];
     return {
-      count: stationFoods.length,
+      count: foods.length,
       avgRating:
-        stationFoods.length > 0
-          ? (stationFoods.reduce((sum, f) => sum + f.rating, 0) / stationFoods.length).toFixed(1)
+        foods.length > 0
+          ? (foods.reduce((sum, f) => sum + f.rating, 0) / foods.length).toFixed(1)
           : "0",
-      maxRating: stationFoods.length > 0 ? Math.max(...stationFoods.map((f) => f.rating)) : 0,
+      maxRating: foods.length > 0 ? Math.max(...foods.map((f) => f.rating)) : 0,
     };
-  }, [currentStation]);
+  }, [foods]);
 
   const handleAddFood = async (foodData: Omit<FoodItem, "id" | "stationId">) => {
     const newFood: FoodItem = {
@@ -175,7 +194,7 @@ export default function StationSidebar({
     onDataChange();
   };
 
-  if (!station || !currentStation) {
+  if (!station) {
     return null;
   }
 
@@ -198,107 +217,84 @@ export default function StationSidebar({
     <div className="fixed inset-y-0 right-0 w-full md:w-[480px] bg-white shadow-2xl z-50 overflow-y-auto">
       <div className="sticky top-0 bg-white border-b px-6 py-4 z-10">
         <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2 text-gray-500 text-sm mb-1">
-              <MapPin className="w-4 h-4" />
-              <span>地铁站点</span>
+          <div className="flex items-center gap-3">
+            <div
+              className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold"
+              style={{ backgroundColor: lineColor }}
+            >
+              <MapPin className="w-5 h-5" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900">{currentStation.name}</h2>
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">{station.name}</h2>
+              <p className="text-sm text-gray-500">{lineName}</p>
+            </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
-            <X className="w-6 h-6" />
+            <X className="w-6 h-6 text-gray-500" />
           </button>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 mt-4">
-          <div className="bg-blue-50 rounded-lg p-3 text-center">
-            <div className="text-2xl font-bold text-blue-600">{stats.count}</div>
-            <div className="text-xs text-gray-600 mt-1">美食数量</div>
-          </div>
-          <div className="bg-yellow-50 rounded-lg p-3 text-center">
-            <div className="text-2xl font-bold text-yellow-600">{stats.avgRating}⭐</div>
-            <div className="text-xs text-gray-600 mt-1">平均评分</div>
-          </div>
-          <div className="bg-green-50 rounded-lg p-3 text-center">
-            <div className="text-2xl font-bold text-green-600">{stats.maxRating}⭐</div>
-            <div className="text-xs text-gray-600 mt-1">最高评分</div>
-          </div>
-        </div>
-      </div>
-
-      <div className="px-6 py-4 border-b bg-gray-50">
-        <div className="flex items-center justify-between">
+        <div className="mt-4 flex items-center gap-4 text-sm">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">排序：</span>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as SortOption)}
-              className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="default">默认</option>
-              <option value="rating-desc">评分从高到低</option>
-              <option value="rating-asc">评分从低到高</option>
-            </select>
+            <span className="text-gray-500">美食数量:</span>
+            <span className="font-semibold text-gray-900">{stats.count}</span>
           </div>
+          <div className="flex items-center gap-2">
+            <span className="text-gray-500">平均评分:</span>
+            <span className="font-semibold text-orange-500">{stats.avgRating}</span>
+          </div>
+          {stats.maxRating > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="text-gray-500">最高评分:</span>
+              <span className="font-semibold text-orange-500">{stats.maxRating}</span>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-4 flex items-center gap-3">
           <button
             onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white py-2.5 px-4 rounded-lg font-medium transition-colors"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-5 h-5" />
             添加美食
           </button>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as SortOption)}
+            className="px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+          >
+            <option value="default">默认排序</option>
+            <option value="rating-desc">评分从高到低</option>
+            <option value="rating-asc">评分从低到高</option>
+          </select>
         </div>
       </div>
 
-      <div className="px-6 py-4">
+      <div className="p-6 space-y-4">
         {foods.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="text-gray-400 mb-4">
-              <svg
-                className="w-16 h-16 mx-auto"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                />
-              </svg>
+          <div className="text-center py-12">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Plus className="w-8 h-8 text-gray-400" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              暂无美食信息
-            </h3>
-            <p className="text-gray-500 mb-6">
-              点击上方"添加美食"按钮开始记录
-            </p>
-            <button
-              onClick={() => setShowForm(true)}
-              className="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              添加第一个美食
-            </button>
+            <p className="text-gray-500">还没有添加美食</p>
+            <p className="text-sm text-gray-400 mt-1">点击上方按钮添加第一个美食</p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {foods.map((food) => (
-              <FoodCard
-                key={food.id}
-                food={food}
-                onEdit={(f) => {
-                  setEditingFood(f);
-                  setShowForm(true);
-                }}
-                onDelete={handleDeleteFood}
-              />
-            ))}
-          </div>
+          foods.map((food) => (
+            <FoodCard
+              key={food.id}
+              food={food}
+              onEdit={() => {
+                setEditingFood(food);
+                setShowForm(true);
+              }}
+              onDelete={() => handleDeleteFood(food.id)}
+            />
+          ))
         )}
       </div>
     </div>
