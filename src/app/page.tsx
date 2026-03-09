@@ -8,7 +8,7 @@ import SubwayMap from "@/components/subway-map";
 import StationSidebar from "@/components/station-sidebar";
 import AllFoodsList from "@/components/all-foods-list";
 import { MemphisPattern, MemphisStatCard } from "@/components/memphis-pattern";
-import { MapPin, Star, Utensils, Sparkles } from "lucide-react";
+import { Star, Sparkles } from "lucide-react";
 import "@/styles/memphis-theme.css";
 
 export default function Home() {
@@ -182,20 +182,6 @@ export default function Home() {
               </button>
 
               <div className="flex flex-wrap gap-4">
-                <MemphisStatCard
-                  value={totalStats.totalLines}
-                  label="线路"
-                  color="#98D9C2"
-                  rotation={2}
-                  icon={<Utensils size={24} />}
-                />
-                <MemphisStatCard
-                  value={totalStats.totalStations}
-                  label="站点"
-                  color="#C3B1E1"
-                  rotation={-1}
-                  icon={<MapPin size={24} />}
-                />
                 <MemphisStatCard
                   value={totalStats.avgRating}
                   label="评分"
