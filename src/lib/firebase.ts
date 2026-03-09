@@ -1,7 +1,11 @@
 import { initializeApp, FirebaseApp, getApps, getApp } from "firebase/app";
 import { getDatabase, Database } from "firebase/database";
 
-const firebaseConfig = {
+let app: FirebaseApp | null = null;
+let database: Database | null = null;
+
+// 获取环境变量（在函数内部调用，确保在客户端执行时获取）
+const getFirebaseConfig = () => ({
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
   databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
@@ -9,17 +13,25 @@ const firebaseConfig = {
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-};
-
-let app: FirebaseApp | null = null;
-let database: Database | null = null;
+});
 
 export const isConfigured = () => {
-  return !!(
-    firebaseConfig.apiKey &&
-    firebaseConfig.databaseURL &&
-    firebaseConfig.projectId
+  const config = getFirebaseConfig();
+  const configured = !!(
+    config.apiKey &&
+    config.databaseURL &&
+    config.projectId
   );
+  
+  if (!configured) {
+    console.log("Firebase config check:", {
+      hasApiKey: !!config.apiKey,
+      hasDatabaseUrl: !!config.databaseURL,
+      hasProjectId: !!config.projectId,
+    });
+  }
+  
+  return configured;
 };
 
 export const getFirebase = () => {
@@ -27,15 +39,21 @@ export const getFirebase = () => {
     return { app: null, database: null };
   }
 
-  if (!isConfigured()) {
-    console.warn("Firebase not configured - missing environment variables");
+  const config = getFirebaseConfig();
+
+  if (!config.apiKey || !config.databaseURL || !config.projectId) {
+    console.warn("Firebase not configured - missing environment variables:", {
+      apiKey: config.apiKey ? "✓" : "✗",
+      databaseURL: config.databaseURL ? "✓" : "✗",
+      projectId: config.projectId ? "✓" : "✗",
+    });
     return { app: null, database: null };
   }
 
   try {
     if (!app) {
       if (getApps().length === 0) {
-        app = initializeApp(firebaseConfig);
+        app = initializeApp(config);
         console.log("Firebase initialized successfully");
       } else {
         app = getApp();
@@ -55,6 +73,10 @@ export const getFirebase = () => {
   }
 };
 
+// 只在客户端初始化
 if (typeof window !== "undefined") {
-  getFirebase();
+  // 延迟初始化，确保环境变量已加载
+  setTimeout(() => {
+    getFirebase();
+  }, 0);
 }
