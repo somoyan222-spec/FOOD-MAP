@@ -74,14 +74,14 @@ export default function Home() {
 
   const totalStats = {
     totalLines: lines.length,
-    totalStations: lines.reduce((sum, line) => sum + line.stations.length, 0),
+    totalStations: lines.reduce((sum, line) => sum + (line.stations || []).length, 0),
     totalFoods: lines.reduce(
-      (sum, line) => sum + line.stations.reduce((s, station) => s + station.foods.length, 0),
+      (sum, line) => sum + (line.stations || []).reduce((s, station) => s + (station.foods || []).length, 0),
       0
     ),
     avgRating: (() => {
       const allFoods = lines.flatMap((line) =>
-        line.stations.flatMap((station) => station.foods)
+        (line.stations || []).flatMap((station) => station.foods || [])
       );
       if (allFoods.length === 0) return "0";
       const avg = allFoods.reduce((sum, f) => sum + f.rating, 0) / allFoods.length;

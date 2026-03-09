@@ -54,7 +54,7 @@ export default function SubwayMap({
     const results: SearchResult[] = [];
 
     lines.forEach((line) => {
-      line.stations.forEach((station) => {
+      (line.stations || []).forEach((station) => {
         if (station.name.toLowerCase().includes(query)) {
           results.push({ station, line });
         }
@@ -126,13 +126,14 @@ export default function SubwayMap({
 
   // 计算当前线路的边界，动态调整 viewBox（竖向展示）
   const getLineViewBox = () => {
-    if (!selectedLine || selectedLine.stations.length === 0) {
+    if (!selectedLine || (selectedLine.stations || []).length === 0) {
       return { x: 0, y: 0, width: 1200, height: 6000 };
     }
 
     // 将横向坐标转换为竖向坐标（交换 x 和 y）
-    const xs = selectedLine.stations.map(s => s.y); // 原来的 y 变成 x（横向）
-    const ys = selectedLine.stations.map(s => s.x); // 原来的 x 变成 y（竖向）
+    const stations = selectedLine.stations || [];
+    const xs = stations.map(s => s.y); // 原来的 y 变成 x（横向）
+    const ys = stations.map(s => s.x); // 原来的 x 变成 y（竖向）
     const minX = Math.min(...xs) - 300; // 增加右侧空间用于显示站点名称
     const maxX = Math.max(...xs) + 100;
     const minY = Math.min(...ys) - 100;
@@ -317,9 +318,9 @@ export default function SubwayMap({
               }}
             >
               {/* 线路 */}
-              {selectedLine.stations.length > 0 && (
+              {(selectedLine.stations || []).length > 0 && (
                 <path
-                  d={`M ${selectedLine.stations[0].y} ${selectedLine.stations[0].x} ${selectedLine.stations
+                  d={`M ${(selectedLine.stations || [])[0].y} ${(selectedLine.stations || [])[0].x} ${(selectedLine.stations || [])
                     .map((s) => `L ${s.y} ${s.x}`)
                     .join(" ")}`}
                   stroke={selectedLine.color}
@@ -331,8 +332,8 @@ export default function SubwayMap({
               )}
 
               {/* 站点 */}
-              {selectedLine.stations.map((station, index) => {
-                const hasFood = station.foods.length > 0;
+              {(selectedLine.stations || []).map((station, index) => {
+                const hasFood = (station.foods || []).length > 0;
                 const isSelected = selectedStation?.id === station.id;
 
                 // 将横向坐标转换为竖向坐标（交换 x 和 y）
@@ -382,14 +383,14 @@ export default function SubwayMap({
                     {hasFood && (
                       <text
                         x={cx - 12}
-                        cy={cy - 5}
+                        y={cy - 5}
                         textAnchor="middle"
                         fontSize={12}
                         fill="white"
                         fontWeight={600}
                         className="pointer-events-none select-none"
                       >
-                        {station.foods.length}
+                        {(station.foods || []).length}
                       </text>
                     )}
 

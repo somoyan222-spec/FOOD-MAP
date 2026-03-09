@@ -122,6 +122,9 @@ export default function StationSidebar({
           (s) => s.id === station!.id
         );
         if (stationIndex >= 0) {
+          if (!data.lines[lineIndex].stations[stationIndex].foods) {
+            data.lines[lineIndex].stations[stationIndex].foods = [];
+          }
           data.lines[lineIndex].stations[stationIndex].foods.push(newFood);
           storage.saveData(data);
         }
@@ -152,6 +155,9 @@ export default function StationSidebar({
           (s) => s.id === station!.id
         );
         if (stationIndex >= 0) {
+          if (!data.lines[lineIndex].stations[stationIndex].foods) {
+            data.lines[lineIndex].stations[stationIndex].foods = [];
+          }
           const foodIndex = data.lines[lineIndex].stations[
             stationIndex
           ].foods.findIndex((f) => f.id === editingFood.id);
@@ -182,6 +188,9 @@ export default function StationSidebar({
           (s) => s.id === station!.id
         );
         if (stationIndex >= 0) {
+          if (!data.lines[lineIndex].stations[stationIndex].foods) {
+            data.lines[lineIndex].stations[stationIndex].foods = [];
+          }
           data.lines[lineIndex].stations[stationIndex].foods = data.lines[
             lineIndex
           ].stations[stationIndex].foods.filter((f) => f.id !== foodId);

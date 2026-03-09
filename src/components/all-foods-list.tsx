@@ -20,8 +20,8 @@ export default function AllFoodsList({ lines, onClose }: AllFoodsListProps) {
     const foods: (FoodItem & { stationName: string; lineName: string; lineColor: string })[] = [];
 
     lines.forEach((line) => {
-      line.stations.forEach((station) => {
-        station.foods.forEach((food) => {
+      (line.stations || []).forEach((station) => {
+        (station.foods || []).forEach((food) => {
           foods.push({
             ...food,
             stationName: station.name,
