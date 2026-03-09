@@ -2,6 +2,7 @@
 
 import { FoodItem } from "@/types";
 import { Star, MapPin, Utensils, DollarSign } from "lucide-react";
+import { MalteseDog, PawPrint } from "./maltese-dog";
 
 interface FoodCardProps {
   food: FoodItem;
@@ -10,7 +11,6 @@ interface FoodCardProps {
 }
 
 export default function FoodCard({ food, onEdit, onDelete }: FoodCardProps) {
-  // 生成星级显示
   const renderStars = (rating: number) => {
     return (
       <div className="flex gap-0.5">
@@ -27,28 +27,54 @@ export default function FoodCard({ food, onEdit, onDelete }: FoodCardProps) {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm hover:shadow-md transition-shadow">
+    <div 
+      className="rounded-2xl p-5 shadow-sm hover:shadow-lg transition-all relative overflow-hidden"
+      style={{
+        background: "linear-gradient(145deg, #FFFFFF 0%, #FFF8F0 100%)",
+        border: "3px solid #F5E6D3",
+        boxShadow: "0 4px 15px rgba(255, 140, 105, 0.1)"
+      }}
+    >
+      {/* 背景装饰 - 小狗脚印 */}
+      <div className="absolute -bottom-2 -right-2 opacity-20 pointer-events-none">
+        <PawPrint size={50} />
+      </div>
+      
+      {/* 背景装饰 - 小狗头像 */}
+      <div className="absolute -top-3 -right-3 opacity-15 pointer-events-none">
+        <MalteseDog size={60} color="white" />
+      </div>
+
       {/* 头部：店名 + 评分 + 操作按钮 */}
-      <div className="flex items-start justify-between mb-3">
+      <div className="flex items-start justify-between mb-4 relative z-10">
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          <h3 
+            className="text-xl font-bold mb-2"
+            style={{ color: "#2C3E50" }}
+          >
             {food.name}
           </h3>
           <div className="flex items-center gap-4 text-sm">
             <div className="flex items-center gap-1">
               {renderStars(food.rating)}
-              <span className="text-gray-600 ml-1">{food.rating}.0</span>
+              <span className="ml-1 font-medium" style={{ color: "#5D6D7E" }}>
+                {food.rating}.0
+              </span>
             </div>
           </div>
         </div>
-        <div className="flex gap-1">
+        <div className="flex gap-2">
           <button
             onClick={() => onEdit(food)}
-            className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+            className="p-2.5 rounded-xl transition-all hover:scale-110"
+            style={{
+              background: "linear-gradient(135deg, #87CEEB 0%, #B8E6F0 100%)",
+              color: "#2C3E50"
+            }}
             title="编辑"
           >
             <svg
-              className="w-4 h-4"
+              className="w-4.5 h-4.5"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -63,11 +89,15 @@ export default function FoodCard({ food, onEdit, onDelete }: FoodCardProps) {
           </button>
           <button
             onClick={() => onDelete(food.id)}
-            className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            className="p-2.5 rounded-xl transition-all hover:scale-110"
+            style={{
+              background: "linear-gradient(135deg, #FF8C69 0%, #FFB6A3 100%)",
+              color: "white"
+            }}
             title="删除"
           >
             <svg
-              className="w-4 h-4"
+              className="w-4.5 h-4.5"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -84,37 +114,73 @@ export default function FoodCard({ food, onEdit, onDelete }: FoodCardProps) {
       </div>
 
       {/* 分类和价格 */}
-      <div className="flex flex-wrap gap-2 mb-3">
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-          <Utensils className="w-3 h-3 mr-1" />
+      <div className="flex flex-wrap gap-3 mb-4 relative z-10">
+        <span 
+          className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold"
+          style={{
+            background: "linear-gradient(135deg, #87CEEB 0%, #B8E6F0 100%)",
+            color: "#2C3E50"
+          }}
+        >
+          <Utensils className="w-3.5 h-3.5 mr-1.5" />
           {food.category}
         </span>
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-          <DollarSign className="w-3 h-3 mr-1" />
+        <span 
+          className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold"
+          style={{
+            background: "linear-gradient(135deg, #90EE90 0%, #C8F0C8 100%)",
+            color: "#2C3E50"
+          }}
+        >
+          <DollarSign className="w-3.5 h-3.5 mr-1.5" />
           {food.priceRange}
         </span>
       </div>
 
       {/* 推荐菜品 */}
       {food.recommendedDish && (
-        <div className="mb-3">
-          <span className="text-xs text-gray-500">推荐菜品：</span>
-          <span className="text-sm text-gray-900 ml-1">
+        <div className="mb-4 relative z-10">
+          <span 
+            className="text-xs font-medium"
+            style={{ color: "#8B4513" }}
+          >
+            🍽️ 推荐菜品：
+          </span>
+          <span 
+            className="text-sm ml-1 font-medium"
+            style={{ color: "#2C3E50" }}
+          >
             {food.recommendedDish}
           </span>
         </div>
       )}
 
       {/* 距离 */}
-      <div className="flex items-center gap-1 text-sm text-gray-600 mb-3">
-        <MapPin className="w-4 h-4" />
-        <span>距地铁站 {food.distance} 米</span>
+      <div className="flex items-center gap-1.5 text-sm mb-4 relative z-10">
+        <MapPin 
+          className="w-4.5 h-4.5"
+          style={{ color: "#FF8C69" }}
+        />
+        <span 
+          className="font-medium"
+          style={{ color: "#5D6D7E" }}
+        >
+          📍 距地铁站 {food.distance} 米
+        </span>
       </div>
 
       {/* 备注 */}
       {food.remarks && (
-        <div className="pt-3 border-t border-gray-100">
-          <p className="text-sm text-gray-600">{food.remarks}</p>
+        <div 
+          className="pt-4 border-t relative z-10"
+          style={{ borderColor: "rgba(255, 140, 105, 0.2)" }}
+        >
+          <p 
+            className="text-sm"
+            style={{ color: "#5D6D7E" }}
+          >
+            💭 {food.remarks}
+          </p>
         </div>
       )}
     </div>

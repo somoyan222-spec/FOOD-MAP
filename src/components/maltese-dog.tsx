@@ -9,7 +9,7 @@ interface MalteseDogProps {
   animated?: boolean;
 }
 
-// 线条小狗 SVG 组件
+// 线条小狗 SVG 组件（基本款）
 export const MalteseDog: React.FC<MalteseDogProps> = ({
   color = "beige",
   size = 100,
@@ -92,7 +92,7 @@ export const MalteseDog: React.FC<MalteseDogProps> = ({
         strokeLinecap="round"
       />
       
-      {/* 舌头（开心时） */}
+      {/* 舌头 */}
       <ellipse
         cx="100"
         cy="92"
@@ -145,6 +145,212 @@ export const MalteseDog: React.FC<MalteseDogProps> = ({
       {/* 腮红 */}
       <ellipse cx="55" cy="75" rx="8" ry="5" fill="#FFB6C1" opacity="0.5" />
       <ellipse cx="145" cy="75" rx="8" ry="5" fill="#FFB6C1" opacity="0.5" />
+    </svg>
+  );
+};
+
+// 两只小狗坐在一起（参考图1）
+export const TwoDogsTogether: React.FC<{ size?: number; className?: string }> = ({
+  size = 200,
+  className = "",
+}) => {
+  return (
+    <svg
+      width={size}
+      height={size * 0.8}
+      viewBox="0 0 200 160"
+      className={className}
+    >
+      {/* 蓝天背景 */}
+      <rect x="0" y="0" width="200" height="100" fill="#87CEEB" />
+      {/* 草地背景 */}
+      <rect x="0" y="100" width="200" height="60" fill="#90EE90" />
+      
+      {/* 白云 */}
+      <ellipse cx="40" cy="30" rx="20" ry="12" fill="white" />
+      <ellipse cx="55" cy="25" rx="15" ry="10" fill="white" />
+      <ellipse cx="30" cy="35" rx="12" ry="8" fill="white" />
+      
+      <ellipse cx="150" cy="25" rx="18" ry="10" fill="white" />
+      <ellipse cx="165" cy="20" rx="14" ry="9" fill="white" />
+      <ellipse cx="140" cy="30" rx="10" ry="7" fill="white" />
+      
+      {/* 白色小狗 */}
+      {/* 身体 */}
+      <ellipse cx="75" cy="125" rx="30" ry="22" fill="#FFFFFF" stroke="#2C3E50" strokeWidth="3" />
+      {/* 头 */}
+      <ellipse cx="75" cy="95" rx="28" ry="25" fill="#FFFFFF" stroke="#2C3E50" strokeWidth="3" />
+      {/* 耳朵 */}
+      <ellipse cx="52" cy="90" rx="12" ry="18" fill="#FFFFFF" stroke="#2C3E50" strokeWidth="3" />
+      <ellipse cx="98" cy="90" rx="12" ry="18" fill="#FFFFFF" stroke="#2C3E50" strokeWidth="3" />
+      {/* 眼睛 */}
+      <circle cx="65" cy="90" r="3" fill="#2C3E50" />
+      <circle cx="85" cy="90" r="3" fill="#2C3E50" />
+      {/* 鼻子 */}
+      <ellipse cx="75" cy="98" rx="4" ry="3" fill="#2C3E50" />
+      {/* 嘴巴 */}
+      <path d="M 68 103 Q 75 108 82 103" fill="none" stroke="#2C3E50" strokeWidth="2" strokeLinecap="round" />
+      {/* 爪子 */}
+      <ellipse cx="60" cy="140" rx="8" ry="10" fill="#FFFFFF" stroke="#2C3E50" strokeWidth="2" />
+      <ellipse cx="90" cy="140" rx="8" ry="10" fill="#FFFFFF" stroke="#2C3E50" strokeWidth="2" />
+      
+      {/* 米色小狗 */}
+      {/* 身体 */}
+      <ellipse cx="135" cy="128" rx="32" ry="24" fill="#F5E6D3" stroke="#2C3E50" strokeWidth="3" />
+      {/* 头 */}
+      <ellipse cx="135" cy="92" rx="30" ry="26" fill="#F5E6D3" stroke="#2C3E50" strokeWidth="3" />
+      {/* 耳朵 */}
+      <ellipse cx="110" cy="88" rx="13" ry="19" fill="#F5E6D3" stroke="#2C3E50" strokeWidth="3" />
+      <ellipse cx="160" cy="88" rx="13" ry="19" fill="#F5E6D3" stroke="#2C3E50" strokeWidth="3" />
+      {/* 眼睛 */}
+      <circle cx="123" cy="87" r="3" fill="#2C3E50" />
+      <circle cx="147" cy="87" r="3" fill="#2C3E50" />
+      {/* 鼻子 */}
+      <ellipse cx="135" cy="96" rx="4" ry="3" fill="#2C3E50" />
+      {/* 嘴巴 */}
+      <path d="M 127 101 Q 135 107 143 101" fill="none" stroke="#2C3E50" strokeWidth="2" strokeLinecap="round" />
+      {/* 项圈 */}
+      <path d="M 110 112 Q 135 118 160 112" fill="none" stroke="#FF8C69" strokeWidth="4" strokeLinecap="round" />
+      {/* 爪子 */}
+      <ellipse cx="118" cy="145" rx="9" ry="11" fill="#F5E6D3" stroke="#2C3E50" strokeWidth="2" />
+      <ellipse cx="152" cy="145" rx="9" ry="11" fill="#F5E6D3" stroke="#2C3E50" strokeWidth="2" />
+      {/* 尾巴 */}
+      <path d="M 165 125 Q 180 118 178 110 Q 182 102 175 98" fill="none" stroke="#2C3E50" strokeWidth="3" strokeLinecap="round" />
+    </svg>
+  );
+};
+
+// 开心的白色小狗（参考图2）
+export const HappyWhiteDog: React.FC<{ size?: number; className?: string }> = ({
+  size = 150,
+  className = "",
+}) => {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 150 150"
+      className={className}
+    >
+      {/* 浅黄色背景 */}
+      <rect x="0" y="0" width="150" height="150" fill="#FFEFB5" />
+      
+      {/* 花朵装饰 */}
+      <g fill="#FFB6C1" opacity="0.8">
+        <circle cx="30" cy="40" r="12" />
+        <circle cx="22" cy="32" r="6" />
+        <circle cx="38" cy="32" r="6" />
+        <circle cx="22" cy="48" r="6" />
+        <circle cx="38" cy="48" r="6" />
+        <circle cx="30" cy="40" r="4" fill="#FFD1DC" />
+      </g>
+      
+      <g fill="#FFB6C1" opacity="0.7">
+        <circle cx="120" cy="35" r="10" />
+        <circle cx="113" cy="28" r="5" />
+        <circle cx="127" cy="28" r="5" />
+        <circle cx="113" cy="42" r="5" />
+        <circle cx="127" cy="42" r="5" />
+        <circle cx="120" cy="35" r="3" fill="#FFD1DC" />
+      </g>
+      
+      <g fill="#FFB6C1" opacity="0.6">
+        <circle cx="25" cy="100" r="9" />
+        <circle cx="19" cy="94" r="4" />
+        <circle cx="31" cy="94" r="4" />
+        <circle cx="19" cy="106" r="4" />
+        <circle cx="31" cy="106" r="4" />
+        <circle cx="25" cy="100" r="3" fill="#FFD1DC" />
+      </g>
+      
+      {/* 白色小狗身体 */}
+      <ellipse cx="75" cy="110" rx="40" ry="35" fill="#FFFFFF" stroke="#2C3E50" strokeWidth="4" />
+      {/* 头 */}
+      <ellipse cx="75" cy="65" rx="35" ry="32" fill="#FFFFFF" stroke="#2C3E50" strokeWidth="4" />
+      {/* 耳朵 */}
+      <ellipse cx="45" cy="55" rx="15" ry="22" fill="#FFFFFF" stroke="#2C3E50" strokeWidth="4" />
+      <ellipse cx="105" cy="55" rx="15" ry="22" fill="#FFFFFF" stroke="#2C3E50" strokeWidth="4" />
+      {/* 眼睛 */}
+      <circle cx="60" cy="60" r="4" fill="#2C3E50" />
+      <circle cx="90" cy="60" r="4" fill="#2C3E50" />
+      {/* 鼻子 */}
+      <ellipse cx="75" cy="70" rx="5" ry="4" fill="#2C3E50" />
+      {/* 嘴巴 */}
+      <path d="M 63 80 Q 75 90 87 80" fill="none" stroke="#2C3E50" strokeWidth="3" strokeLinecap="round" />
+      {/* 腮红 */}
+      <ellipse cx="48" cy="68" rx="10" ry="6" fill="#FFB6C1" opacity="0.6" />
+      <ellipse cx="102" cy="68" rx="10" ry="6" fill="#FFB6C1" opacity="0.6" />
+      {/* 左前爪 */}
+      <path d="M 30 95 Q 25 85 18 80 Q 10 85 8 95" fill="none" stroke="#2C3E50" strokeWidth="5" strokeLinecap="round" />
+      {/* 右前爪 */}
+      <path d="M 120 95 Q 125 85 132 80 Q 140 85 142 95" fill="none" stroke="#2C3E50" strokeWidth="5" strokeLinecap="round" />
+      {/* 尾巴 */}
+      <path d="M 115 130 Q 130 125 135 110" fill="none" stroke="#2C3E50" strokeWidth="5" strokeLinecap="round" />
+    </svg>
+  );
+};
+
+// 两只小狗趴着（参考图3）
+export const TwoDogsLying: React.FC<{ size?: number; className?: string }> = ({
+  size = 200,
+  className = "",
+}) => {
+  return (
+    <svg
+      width={size}
+      height={size * 0.6}
+      viewBox="0 0 200 120"
+      className={className}
+    >
+      {/* 白色小狗 */}
+      {/* 身体 */}
+      <ellipse cx="65" cy="85" rx="35" ry="20" fill="#FFFFFF" stroke="#2C3E50" strokeWidth="3" />
+      {/* 头 */}
+      <ellipse cx="55" cy="55" rx="28" ry="25" fill="#FFFFFF" stroke="#2C3E50" strokeWidth="3" />
+      {/* 耳朵 */}
+      <ellipse cx="35" cy="50" rx="12" ry="15" fill="#FFFFFF" stroke="#2C3E50" strokeWidth="3" />
+      <ellipse cx="75" cy="50" rx="12" ry="15" fill="#FFFFFF" stroke="#2C3E50" strokeWidth="3" />
+      {/* 眼睛 */}
+      <circle cx="45" cy="52" r="3" fill="#2C3E50" />
+      <circle cx="65" cy="52" r="3" fill="#2C3E50" />
+      {/* 鼻子 */}
+      <ellipse cx="55" cy="60" rx="4" ry="3" fill="#2C3E50" />
+      {/* 嘴巴 */}
+      <path d="M 48 66 Q 55 71 62 66" fill="none" stroke="#2C3E50" strokeWidth="2" strokeLinecap="round" />
+      {/* 前爪 */}
+      <path d="M 35 92 L 30 105 L 45 105 L 42 92 Z" fill="#FFFFFF" stroke="#2C3E50" strokeWidth="2" />
+      <path d="M 75 92 L 70 105 L 85 105 L 82 92 Z" fill="#FFFFFF" stroke="#2C3E50" strokeWidth="2" />
+      
+      {/* 米色小狗 */}
+      {/* 身体 */}
+      <ellipse cx="135" cy="88" rx="40" ry="22" fill="#F5E6D3" stroke="#2C3E50" strokeWidth="3" />
+      {/* 头 */}
+      <ellipse cx="120" cy="52" rx="30" ry="26" fill="#F5E6D3" stroke="#2C3E50" strokeWidth="3" />
+      {/* 耳朵 */}
+      <ellipse cx="98" cy="48" rx="13" ry="17" fill="#F5E6D3" stroke="#2C3E50" strokeWidth="3" />
+      <ellipse cx="142" cy="48" rx="13" ry="17" fill="#F5E6D3" stroke="#2C3E50" strokeWidth="3" />
+      {/* 眼睛 */}
+      <circle cx="108" cy="50" r="3" fill="#2C3E50" />
+      <circle cx="132" cy="50" r="3" fill="#2C3E50" />
+      {/* 鼻子 */}
+      <ellipse cx="120" cy="58" rx="4" ry="3" fill="#2C3E50" />
+      {/* 嘴巴 */}
+      <path d="M 112 64 Q 120 70 128 64" fill="none" stroke="#2C3E50" strokeWidth="2" strokeLinecap="round" />
+      {/* 项圈 */}
+      <path d="M 95 70 Q 120 76 145 70" fill="none" stroke="#FF8C69" strokeWidth="4" strokeLinecap="round" />
+      {/* 前爪 */}
+      <ellipse cx="95" cy="100" rx="10" ry="12" fill="#F5E6D3" stroke="#2C3E50" strokeWidth="2" />
+      <ellipse cx="120" cy="100" rx="10" ry="12" fill="#F5E6D3" stroke="#2C3E50" strokeWidth="2" />
+      {/* 尾巴 */}
+      <path d="M 170 88 Q 185 82 188 72 Q 190 62 182 58" fill="none" stroke="#2C3E50" strokeWidth="3" strokeLinecap="round" />
+      
+      {/* 装饰星星 */}
+      <circle cx="45" cy="35" r="3" fill="#FDCB6E" />
+      <circle cx="38" cy="42" r="2" fill="#FDCB6E" />
+      <circle cx="52" cy="38" r="2" fill="#FDCB6E" />
+      <circle cx="110" cy="32" r="3" fill="#FDCB6E" />
+      <circle cx="103" cy="39" r="2" fill="#FDCB6E" />
+      <circle cx="117" cy="35" r="2" fill="#FDCB6E" />
     </svg>
   );
 };
