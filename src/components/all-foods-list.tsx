@@ -84,7 +84,7 @@ export default function AllFoodsList({ lines, onClose }: AllFoodsListProps) {
       >
         <MemphisPattern />
         
-        <div className="relative z-10 flex flex-col" style={{ height: '100%' }}>
+        <div className="relative z-10 flex flex-col h-full">
           <div className="p-4 md:p-6 border-b-4 border-black">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
@@ -177,7 +177,7 @@ export default function AllFoodsList({ lines, onClose }: AllFoodsListProps) {
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 md:p-6">
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-12 md:pb-16" style={{ minHeight: 0, maxHeight: 'calc(100vh - 300px)' }}>
             {filteredFoods.length === 0 ? (
               <div className="text-center py-16">
                 <div 
