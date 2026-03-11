@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { SubwayLine, FoodItem, FoodCategory } from "@/types";
 import { FOOD_CATEGORIES } from "@/lib/data";
-import { X, Filter, Sparkles } from "lucide-react";
+import { X, Search, Sparkles } from "lucide-react";
 import FoodCard from "./food-card";
 import { MemphisPattern } from "./memphis-pattern";
 import "@/styles/memphis-theme.css";
@@ -17,7 +17,7 @@ const memphisColors = ["#98D9C2", "#FF6B6B", "#C3B1E1", "#F7DC6F", "#87CEEB", "#
 const rotations = [-3, -2, -1, 0, 1, 2, 3];
 
 export default function AllFoodsList({ lines, onClose }: AllFoodsListProps) {
-  const [selectedCategory, setSelectedCategory] = useState<FoodCategory | "全部">("全部");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const allFoods = useMemo(() => {
     const foods: (FoodItem & { stationName: string; lineName: string; lineColor: string })[] = [];
@@ -41,12 +41,19 @@ export default function AllFoodsList({ lines, onClose }: AllFoodsListProps) {
   const filteredFoods = useMemo(() => {
     let result = allFoods;
 
-    if (selectedCategory !== "全部") {
-      result = result.filter((food) => food.category === selectedCategory);
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(
+        (food) =>
+          food.name.toLowerCase().includes(query) ||
+          food.recommendedDish.toLowerCase().includes(query) ||
+          food.stationName.toLowerCase().includes(query) ||
+          food.lineName.toLowerCase().includes(query)
+      );
     }
 
     return result;
-  }, [allFoods, selectedCategory]);
+  }, [allFoods, searchQuery]);
 
   const categoryStats = useMemo(() => {
     const stats: Record<string, number> = { 全部: allFoods.length };
@@ -148,36 +155,36 @@ export default function AllFoodsList({ lines, onClose }: AllFoodsListProps) {
                     transform: "rotate(3deg)"
                   }}
                 >
-                  <Filter size={16} style={{ color: "#2C2C2C" }} />
+                  <Search size={16} style={{ color: "#2C2C2C" }} />
                 </div>
-                <span className="text-sm font-bold">按分类筛选</span>
+                <span className="text-sm font-bold">搜索美食、站点或线路</span>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {(["全部", ...FOOD_CATEGORIES] as const).map((cat, index) => {
-                  const randomColor = memphisColors[index % memphisColors.length];
-                  const randomRotation = rotations[Math.floor(Math.random() * rotations.length)];
-                  const isSelected = selectedCategory === cat;
-                  
-                  return (
-                    <button
-                      key={cat}
-                      onClick={() => setSelectedCategory(cat)}
-                      className="memphis-card px-3 py-1.5 text-sm font-bold transition-all hover:scale-105"
-                      style={{ 
-                        background: isSelected ? randomColor : "#FFF",
-                        transform: `rotate(${randomRotation}deg)`,
-                        opacity: isSelected ? 1 : 0.8
-                      }}
-                    >
-                      {cat} ({categoryStats[cat]})
-                    </button>
-                  );
-                })}
+              <div className="relative">
+                <div 
+                  className="absolute left-3 top-1/2 -translate-y-1/2 memphis-card p-1"
+                  style={{ 
+                    background: "#87CEEB",
+                    transform: "rotate(-5deg)"
+                  }}
+                >
+                  <Search size={16} style={{ color: "#2C2C2C" }} />
+                </div>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="搜索店名、推荐菜品、站点或线路..."
+                  className="w-full pl-12 pr-4 py-3 border-3 border-black rounded-2xl font-medium focus:outline-none focus:ring-4 focus:ring-offset-2"
+                  style={{ 
+                    background: "#FFF",
+                    fontFamily: "var(--font-memphis)"
+                  }}
+                />
               </div>
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-12 md:pb-16" style={{ minHeight: 0, maxHeight: 'calc(100vh - 300px)' }}>
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-24" style={{ minHeight: 0, maxHeight: 'calc(100vh - 300px)' }}>
             {filteredFoods.length === 0 ? (
               <div className="text-center py-16">
                 <div 
@@ -193,7 +200,7 @@ export default function AllFoodsList({ lines, onClose }: AllFoodsListProps) {
                   暂无符合条件的美食
                 </h3>
                 <p className="text-sm opacity-70">
-                  {selectedCategory !== "全部" ? `分类 "${selectedCategory}" 下没有收录的美食` : "还没有添加任何美食"}
+                  {searchQuery ? `没有找到与 "${searchQuery}" 相关的美食` : "还没有添加任何美食"}
                 </p>
               </div>
             ) : (
