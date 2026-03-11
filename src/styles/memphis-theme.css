@@ -231,3 +231,24 @@ body {
 .animate-pulse-memphis {
   animation: pulse-memphis 2s ease-in-out infinite;
 }
+
+/* Food Pattern Background */
+.food-pattern-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.food-shape {
+  filter: drop-shadow(3px 3px 0px var(--memphis-black));
+  transition: transform 0.3s ease;
+}
+
+.food-shape:hover {
+  transform: scale(1.1);
+}

@@ -5,7 +5,7 @@ import { SubwayLine, FoodItem, FoodCategory } from "@/types";
 import { FOOD_CATEGORIES } from "@/lib/data";
 import { X, Search, Sparkles } from "lucide-react";
 import FoodCard from "./food-card";
-import { MemphisPattern } from "./memphis-pattern";
+import { FoodPattern } from "./food-pattern";
 import "@/styles/memphis-theme.css";
 
 interface AllFoodsListProps {
@@ -19,6 +19,7 @@ const rotations = [-3, -2, -1, 0, 1, 2, 3];
 export default function AllFoodsList({ lines, onClose }: AllFoodsListProps) {
   const [selectedCategory, setSelectedCategory] = useState<FoodCategory | "全部">("全部");
   const [searchQuery, setSearchQuery] = useState("");
+  const [showAllCategories, setShowAllCategories] = useState(false);
 
   const allFoods = useMemo(() => {
     const foods: (FoodItem & { stationName: string; lineName: string; lineColor: string })[] = [];
@@ -94,7 +95,7 @@ export default function AllFoodsList({ lines, onClose }: AllFoodsListProps) {
           transform: "rotate(-0.5deg)"
         }}
       >
-        <MemphisPattern />
+        <FoodPattern />
         
         <div className="relative z-10 flex flex-col h-full">
           <div className="p-4 md:p-6 border-b-4 border-black">
@@ -150,17 +151,13 @@ export default function AllFoodsList({ lines, onClose }: AllFoodsListProps) {
             </div>
           </div>
 
-          <div className="p-4 md:p-6 border-b-4 border-black" style={{ background: "rgba(255, 255, 255, 0.5)" }}>
+          <div className="p-4 md:p-6">
             <div className="mb-4">
               <div className="relative mb-4">
                 <div 
-                  className="absolute left-3 top-1/2 -translate-y-1/2 memphis-card p-1"
-                  style={{ 
-                    background: "#87CEEB",
-                    transform: "rotate(-5deg)"
-                  }}
+                  className="absolute left-3 top-1/2 -translate-y-1/2"
                 >
-                  <Search size={16} style={{ color: "#2C2C2C" }} />
+                  <Search size={20} style={{ color: "#2C2C2C" }} />
                 </div>
                 <input
                   type="text"
@@ -174,20 +171,12 @@ export default function AllFoodsList({ lines, onClose }: AllFoodsListProps) {
                   }}
                 />
               </div>
-              <div className="flex items-center gap-2 mb-3">
-                <div 
-                  className="memphis-card p-1.5"
-                  style={{ 
-                    background: "#C3B1E1",
-                    transform: "rotate(3deg)"
-                  }}
-                >
-                  <Search size={16} style={{ color: "#2C2C2C" }} />
-                </div>
-                <span className="text-sm font-bold">按分类筛选</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {(["全部", ...FOOD_CATEGORIES] as const).map((cat, index) => {
+              <div>
+                {(() => {
+                  const categories = ["全部", "正餐", "烧烤"];
+                  const remainingCategories = ["酒吧", "快餐", "小吃", "奶茶", "咖啡", "甜品", "火锅", "其他"];
+                  return showAllCategories ? [...categories, ...remainingCategories] : categories;
+                })().map((cat, index) => {
                   const randomColor = memphisColors[index % memphisColors.length];
                   const randomRotation = rotations[Math.floor(Math.random() * rotations.length)];
                   const isSelected = selectedCategory === cat;
@@ -196,7 +185,7 @@ export default function AllFoodsList({ lines, onClose }: AllFoodsListProps) {
                     <button
                       key={cat}
                       onClick={() => setSelectedCategory(cat)}
-                      className="memphis-card px-3 py-1.5 text-sm font-bold transition-all hover:scale-105"
+                      className="memphis-card px-3 py-1.5 text-sm font-bold transition-all hover:scale-105 mr-2 mb-2"
                       style={{ 
                         background: isSelected ? randomColor : "#FFF",
                         transform: `rotate(${randomRotation}deg)`,
@@ -207,11 +196,21 @@ export default function AllFoodsList({ lines, onClose }: AllFoodsListProps) {
                     </button>
                   );
                 })}
+                <button
+                  onClick={() => setShowAllCategories(!showAllCategories)}
+                  className="memphis-card px-3 py-1.5 text-sm font-bold transition-all hover:scale-105 mr-2 mb-2"
+                  style={{ 
+                    background: "#87CEEB",
+                    transform: "rotate(2deg)"
+                  }}
+                >
+                  {showAllCategories ? "收起" : "展开更多"}
+                </button>
               </div>
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-20 md:pb-24" style={{ minHeight: 0, maxHeight: 'calc(100vh - 300px)' }}>
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-32 md:pb-40" style={{ minHeight: 0, maxHeight: 'calc(100vh - 280px)' }}>
             {filteredFoods.length === 0 ? (
               <div className="text-center py-16">
                 <div 

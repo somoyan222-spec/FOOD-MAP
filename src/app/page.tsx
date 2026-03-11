@@ -7,8 +7,8 @@ import { firebaseStorage } from "@/lib/firebase-storage";
 import SubwayMap from "@/components/subway-map";
 import StationSidebar from "@/components/station-sidebar";
 import AllFoodsList from "@/components/all-foods-list";
-import { MemphisPattern, MemphisStatCard } from "@/components/memphis-pattern";
-import { Star, Sparkles } from "lucide-react";
+import { FoodPattern } from "@/components/food-pattern";
+import { Sparkles } from "lucide-react";
 import "@/styles/memphis-theme.css";
 
 export default function Home() {
@@ -104,7 +104,7 @@ export default function Home() {
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center relative" style={{ background: "#FFF8E7" }}>
-        <MemphisPattern />
+        <FoodPattern />
         <div className="text-center relative z-10">
           <div className="memphis-card p-8" style={{ background: "#98D9C2", transform: "rotate(-2deg)" }}>
             <div className="animate-bounce-slow">
@@ -119,7 +119,7 @@ export default function Home() {
 
   return (
     <div className="flex h-screen relative" style={{ background: "#FFF8E7" }}>
-      <MemphisPattern />
+      <FoodPattern />
       
       <div className="flex-1 flex flex-col relative z-10">
         <header className="px-4 py-4 md:px-8 md:py-6">
