@@ -6,12 +6,10 @@ export const MemphisPattern: React.FC = () => {
     { type: "circle", color: "#98D9C2", size: 40, top: "60%", left: "8%", delay: "1s" },
     { type: "circle", color: "#C3B1E1", size: 80, top: "80%", left: "15%", delay: "2s" },
     { type: "circle", color: "#F7DC6F", size: 50, top: "25%", right: "10%", delay: "0.5s" },
-    { type: "circle", color: "#87CEEB", size: 35, top: "70%", right: "5%", delay: "1.5s" },
     { type: "semicircle", color: "#FF6B6B", size: 70, top: "5%", left: "30%", delay: "0.8s" },
     { type: "semicircle", color: "#98D9C2", size: 50, top: "50%", right: "25%", delay: "1.8s" },
     { type: "semicircle", color: "#F7DC6F", size: 60, bottom: "10%", left: "40%", delay: "2.5s" },
     { type: "dots", color: "#F7DC6F", size: 100, top: "35%", left: "50%", delay: "0s" },
-    { type: "dots", color: "#87CEEB", size: 80, bottom: "30%", left: "10%", delay: "1s" },
     { type: "triangle", color: "#FFB6C1", size: 40, top: "20%", right: "35%", delay: "0.6s" },
     { type: "triangle", color: "#FFA07A", size: 30, bottom: "15%", right: "20%", delay: "1.6s" },
   ];
