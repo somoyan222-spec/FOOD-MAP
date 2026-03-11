@@ -56,21 +56,7 @@ export const MemphisPattern: React.FC = () => {
           );
         }
 
-        if (shape.type === "wave") {
-          return (
-            <div
-              key={index}
-              className="memphis-shape animate-wiggle"
-              style={{
-                ...style,
-                width: shape.width,
-                height: 8,
-                background: `repeating-linear-gradient(90deg, ${shape.color} 0px, ${shape.color} 15px, transparent 15px, transparent 30px)`,
-                borderRadius: 4,
-              }}
-            />
-          );
-        }
+
 
         if (shape.type === "dots") {
           return (
