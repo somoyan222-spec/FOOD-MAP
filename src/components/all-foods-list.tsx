@@ -184,7 +184,7 @@ export default function AllFoodsList({ lines, onClose }: AllFoodsListProps) {
                   return (
                     <button
                       key={cat}
-                      onClick={() => setSelectedCategory(cat)}
+                      onClick={() => setSelectedCategory(cat as FoodCategory | "全部")}
                       className="memphis-card px-3 py-1.5 text-sm font-bold transition-all hover:scale-105 mr-2 mb-2"
                       style={{ 
                         background: isSelected ? randomColor : "#FFF",
