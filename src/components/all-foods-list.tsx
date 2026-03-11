@@ -84,7 +84,7 @@ export default function AllFoodsList({ lines, onClose }: AllFoodsListProps) {
       >
         <MemphisPattern />
         
-        <div className="relative z-10 flex flex-col h-full">
+        <div className="relative z-10 flex flex-col" style={{ height: '100%' }}>
           <div className="p-4 md:p-6 border-b-4 border-black">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
