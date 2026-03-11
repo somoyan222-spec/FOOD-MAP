@@ -17,6 +17,7 @@ const memphisColors = ["#98D9C2", "#FF6B6B", "#C3B1E1", "#F7DC6F", "#87CEEB", "#
 const rotations = [-3, -2, -1, 0, 1, 2, 3];
 
 export default function AllFoodsList({ lines, onClose }: AllFoodsListProps) {
+  const [selectedCategory, setSelectedCategory] = useState<FoodCategory | "全部">("全部");
   const [searchQuery, setSearchQuery] = useState("");
 
   const allFoods = useMemo(() => {
@@ -41,6 +42,10 @@ export default function AllFoodsList({ lines, onClose }: AllFoodsListProps) {
   const filteredFoods = useMemo(() => {
     let result = allFoods;
 
+    if (selectedCategory !== "全部") {
+      result = result.filter((food) => food.category === selectedCategory);
+    }
+
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       result = result.filter(
@@ -53,7 +58,7 @@ export default function AllFoodsList({ lines, onClose }: AllFoodsListProps) {
     }
 
     return result;
-  }, [allFoods, searchQuery]);
+  }, [allFoods, selectedCategory, searchQuery]);
 
   const categoryStats = useMemo(() => {
     const stats: Record<string, number> = { 全部: allFoods.length };
@@ -147,19 +152,7 @@ export default function AllFoodsList({ lines, onClose }: AllFoodsListProps) {
 
           <div className="p-4 md:p-6 border-b-4 border-black" style={{ background: "rgba(255, 255, 255, 0.5)" }}>
             <div className="mb-4">
-              <div className="flex items-center gap-2 mb-3">
-                <div 
-                  className="memphis-card p-1.5"
-                  style={{ 
-                    background: "#C3B1E1",
-                    transform: "rotate(3deg)"
-                  }}
-                >
-                  <Search size={16} style={{ color: "#2C2C2C" }} />
-                </div>
-                <span className="text-sm font-bold">搜索美食、站点或线路</span>
-              </div>
-              <div className="relative">
+              <div className="relative mb-4">
                 <div 
                   className="absolute left-3 top-1/2 -translate-y-1/2 memphis-card p-1"
                   style={{ 
@@ -181,6 +174,40 @@ export default function AllFoodsList({ lines, onClose }: AllFoodsListProps) {
                   }}
                 />
               </div>
+              <div className="flex items-center gap-2 mb-3">
+                <div 
+                  className="memphis-card p-1.5"
+                  style={{ 
+                    background: "#C3B1E1",
+                    transform: "rotate(3deg)"
+                  }}
+                >
+                  <Search size={16} style={{ color: "#2C2C2C" }} />
+                </div>
+                <span className="text-sm font-bold">按分类筛选</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {(["全部", ...FOOD_CATEGORIES] as const).map((cat, index) => {
+                  const randomColor = memphisColors[index % memphisColors.length];
+                  const randomRotation = rotations[Math.floor(Math.random() * rotations.length)];
+                  const isSelected = selectedCategory === cat;
+                  
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => setSelectedCategory(cat)}
+                      className="memphis-card px-3 py-1.5 text-sm font-bold transition-all hover:scale-105"
+                      style={{ 
+                        background: isSelected ? randomColor : "#FFF",
+                        transform: `rotate(${randomRotation}deg)`,
+                        opacity: isSelected ? 1 : 0.8
+                      }}
+                    >
+                      {cat} ({categoryStats[cat]})
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
@@ -200,7 +227,13 @@ export default function AllFoodsList({ lines, onClose }: AllFoodsListProps) {
                   暂无符合条件的美食
                 </h3>
                 <p className="text-sm opacity-70">
-                  {searchQuery ? `没有找到与 "${searchQuery}" 相关的美食` : "还没有添加任何美食"}
+                  {searchQuery && selectedCategory !== "全部" 
+                    ? `在分类 "${selectedCategory}" 中没有找到与 "${searchQuery}" 相关的美食`
+                    : searchQuery
+                    ? `没有找到与 "${searchQuery}" 相关的美食`
+                    : selectedCategory !== "全部"
+                    ? `分类 "${selectedCategory}" 下没有收录的美食`
+                    : "还没有添加任何美食"}
                 </p>
               </div>
             ) : (
