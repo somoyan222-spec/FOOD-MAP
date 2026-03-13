@@ -7,7 +7,7 @@ import { X } from "lucide-react";
 
 interface FoodFormProps {
   food?: FoodItem; // 如果有值则为编辑模式，否则为添加模式
-  onSubmit: (food: Omit<FoodItem, "id" | "stationId">) => void;
+  onSubmit: (food: Omit<FoodItem, "id" | "stationId" | "userId" | "userName" | "createdAt" | "updatedAt" | "likes" | "likedBy" | "comments">) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -57,14 +57,14 @@ export default function FoodForm({ food, onSubmit, onCancel }: FoodFormProps) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) {
       return;
     }
 
-    onSubmit({
+    await onSubmit({
       name: formData.name.trim(),
       rating: formData.rating,
       category: formData.category,
