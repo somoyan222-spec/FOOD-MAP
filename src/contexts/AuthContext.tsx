@@ -47,6 +47,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const loadUser = () => {
       try {
+        if (typeof window === 'undefined') {
+          setIsLoading(false);
+          return;
+        }
         const storedUser = localStorage.getItem('localUser');
         if (storedUser) {
           setUser(JSON.parse(storedUser));
@@ -66,6 +70,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsLoading(true);
     setError(null);
     try {
+      if (typeof window === 'undefined') {
+        throw new Error('不支持在服务端注册');
+      }
+
       // 检查邮箱是否已存在
       const existingUser = localStorage.getItem('localUser');
       if (existingUser) {
@@ -101,6 +109,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsLoading(true);
     setError(null);
     try {
+      if (typeof window === 'undefined') {
+        throw new Error('不支持在服务端登录');
+      }
+
       // 检查开发者账号密码
       if (developerEmails.includes(email) && password !== '000212yzy') {
         throw new Error('开发者账号密码错误');
@@ -132,6 +144,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsLoading(true);
     setError(null);
     try {
+      if (typeof window === 'undefined') {
+        throw new Error('不支持在服务端登录');
+      }
+
       // 模拟Google登录
       const newUser: User = {
         id: `user_${Date.now()}`,
@@ -157,6 +173,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const handleSignOut = async () => {
     setIsLoading(true);
     try {
+      if (typeof window === 'undefined') {
+        throw new Error('不支持在服务端登出');
+      }
+
       // 从本地存储移除用户
       localStorage.removeItem('localUser');
       localStorage.removeItem('localAuth');
@@ -177,6 +197,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     setIsLoading(true);
     try {
+      if (typeof window === 'undefined') {
+        throw new Error('不支持在服务端更新资料');
+      }
+
       const updatedUser: User = {
         ...user,
         displayName,
