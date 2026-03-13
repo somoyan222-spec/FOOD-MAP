@@ -119,22 +119,7 @@ export default function AuthPage() {
               {isLoading ? '处理中...' : isLogin ? '登录' : '注册'}
             </Button>
             
-            <div className="flex items-center justify-center">
-              <div className="h-px bg-gray-300 flex-grow"></div>
-              <span className="px-4 text-gray-500">或</span>
-              <div className="h-px bg-gray-300 flex-grow"></div>
-            </div>
-            
-            <Button
-              type="button"
-              className="w-full flex items-center justify-center gap-2"
-              onClick={signInWithGoogle}
-              disabled={isLoading}
-            >
-              <Mail size={18} />
-              用Google登录
-            </Button>
-            
+
             <p className="text-center text-sm text-gray-500">
               {isLogin ? '还没有账号？' : '已有账号？'}
               <button

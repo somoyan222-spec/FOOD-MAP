@@ -152,15 +152,17 @@ export default function Home() {
               <div className="flex items-center gap-3">
                 {user ? (
                   <div className="flex items-center gap-2">
-                    <div 
-                      className="memphis-card p-2"
-                      style={{ 
-                        background: "#98D9C2", 
-                        transform: "rotate(-2deg)"
-                      }}
-                    >
-                      <User size={20} style={{ color: "#2C2C2C" }} />
-                    </div>
+                    <Link href="/profile">
+                      <div 
+                        className="memphis-card p-2 cursor-pointer"
+                        style={{ 
+                          background: "#98D9C2", 
+                          transform: "rotate(-2deg)"
+                        }}
+                      >
+                        <User size={20} style={{ color: "#2C2C2C" }} />
+                      </div>
+                    </Link>
                     <div className="flex flex-col">
                       <span className="font-bold text-sm md:text-base">
                         {user.displayName || user.email}

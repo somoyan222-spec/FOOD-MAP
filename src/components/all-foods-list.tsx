@@ -6,6 +6,9 @@ import { FOOD_CATEGORIES } from "@/lib/data";
 import { X, Search, Sparkles } from "lucide-react";
 import FoodCard from "./food-card";
 import { FoodPattern } from "./food-pattern";
+import { useAuth } from "@/contexts/AuthContext";
+import { storage } from "@/lib/data";
+import { firebaseStorage } from "@/lib/firebase-storage";
 import "@/styles/memphis-theme.css";
 
 interface AllFoodsListProps {
@@ -17,9 +20,94 @@ const memphisColors = ["#98D9C2", "#FF6B6B", "#C3B1E1", "#F7DC6F", "#87CEEB", "#
 const rotations = [-3, -2, -1, 0, 1, 2, 3];
 
 export default function AllFoodsList({ lines, onClose }: AllFoodsListProps) {
-  const [selectedCategory, setSelectedCategory] = useState<FoodCategory | "全部">("全部");
+  const [selectedCategory, setSelectedCategory] = useState<FoodCategory | "全部">('全部');
   const [searchQuery, setSearchQuery] = useState("");
   const [showAllCategories, setShowAllCategories] = useState(false);
+  const [isUsingFirebase, setIsUsingFirebase] = useState(false);
+  const [dataVersion, setDataVersion] = useState(0);
+  const { user } = useAuth();
+  
+  // 检查是否使用Firebase
+  useEffect(() => {
+    const available = firebaseStorage.isAvailable();
+    setIsUsingFirebase(available);
+  }, []);
+  
+  // 处理点赞
+  const handleLikeFood = async (foodId: string) => {
+    if (!user && !localStorage.getItem('guestId')) {
+      const guestId = 'guest_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+      localStorage.setItem('guestId', guestId);
+    }
+    const userId = user?.id || localStorage.getItem('guestId') || 'anonymous';
+    
+    // 找到包含该美食的站点和线路
+    for (const line of lines) {
+      for (const station of line.stations || []) {
+        const foodIndex = (station.foods || []).findIndex(f => f.id === foodId);
+        if (foodIndex >= 0) {
+          const food = station.foods![foodIndex];
+          const isLiked = food.likedBy?.includes(userId) || false;
+          
+          let updatedFoods;
+          if (isLiked) {
+            // 取消点赞
+            updatedFoods = station.foods!.map(f => {
+              if (f.id === foodId) {
+                return {
+                  ...f,
+                  likes: Math.max(0, (f.likes || 0) - 1),
+                  likedBy: f.likedBy?.filter(id => id !== userId) || []
+                };
+              }
+              return f;
+            });
+          } else {
+            // 添加点赞
+            updatedFoods = station.foods!.map(f => {
+              if (f.id === foodId) {
+                return {
+                  ...f,
+                  likes: (f.likes || 0) + 1,
+                  likedBy: [...(f.likedBy || []), userId]
+                };
+              }
+              return f;
+            });
+          }
+          
+          // 更新数据
+          if (isUsingFirebase) {
+            await firebaseStorage.updateFood(line.id, station.id, updatedFoods[foodIndex]);
+          } else {
+            const data = storage.getData();
+            const lineIndex = data.lines.findIndex(l => l.id === line.id);
+            if (lineIndex >= 0) {
+              const stationIndex = data.lines[lineIndex].stations.findIndex(s => s.id === station.id);
+              if (stationIndex >= 0) {
+                data.lines[lineIndex].stations[stationIndex].foods = updatedFoods;
+                storage.saveData(data);
+              }
+            }
+          }
+          
+          // 触发数据更新
+          setDataVersion(prev => prev + 1);
+          return;
+        }
+      }
+    }
+  };
+  
+  // 处理评论
+  const handleCommentFood = (foodId: string) => {
+    if (!user) {
+      alert('请先登录后再评论');
+      return;
+    }
+    // 这里可以实现评论功能，例如打开评论模态框
+    alert('评论功能正在开发中');
+  };
 
   const allFoods = useMemo(() => {
     const foods: (FoodItem & { stationName: string; lineName: string; lineColor: string })[] = [];
@@ -238,88 +326,23 @@ export default function AllFoodsList({ lines, onClose }: AllFoodsListProps) {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 {filteredFoods.map((food, index) => {
-                  const randomColor = memphisColors[index % memphisColors.length];
                   const randomRotation = rotations[Math.floor(Math.random() * rotations.length)];
                   
                   return (
                     <div 
                       key={food.id} 
-                      className="memphis-card p-4 md:p-5"
                       style={{ 
-                        background: "#FFF",
                         transform: `rotate(${randomRotation}deg)`
                       }}
                     >
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <div 
-                              className="w-3 h-3 rounded-full border-2 border-black"
-                              style={{ backgroundColor: food.lineColor }}
-                            />
-                            <span className="text-xs font-bold opacity-70">
-                              {food.lineName} · {food.stationName}
-                            </span>
-                          </div>
-                          <h3 className="font-bold text-base md:text-lg">{food.name}</h3>
-                        </div>
-                        <div 
-                          className="memphis-card px-3 py-1"
-                          style={{ 
-                            background: "#F7DC6F",
-                            transform: "rotate(3deg)"
-                          }}
-                        >
-                          <span className="font-bold text-sm">{food.rating} ⭐</span>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2 text-sm">
-                        <div className="flex items-center gap-2">
-                          <div 
-                            className="w-2 h-2 rounded-full"
-                            style={{ background: randomColor }}
-                          />
-                          <span className="opacity-70">分类:</span>
-                          <span className="font-bold">{food.category}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div 
-                            className="w-2 h-2 rounded-full"
-                            style={{ background: randomColor }}
-                          />
-                          <span className="opacity-70">价格:</span>
-                          <span className="font-bold">{food.priceRange}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div 
-                            className="w-2 h-2 rounded-full"
-                            style={{ background: randomColor }}
-                          />
-                          <span className="opacity-70">推荐:</span>
-                          <span className="font-bold">{food.recommendedDish}</span>
-                        </div>
-                        {food.distance > 0 && (
-                          <div className="flex items-center gap-2">
-                            <div 
-                              className="w-2 h-2 rounded-full"
-                              style={{ background: randomColor }}
-                            />
-                            <span className="opacity-70">距离:</span>
-                            <span className="font-bold">{food.distance} 米</span>
-                          </div>
-                        )}
-                        {food.remarks && (
-                          <div className="flex items-start gap-2">
-                            <div 
-                              className="w-2 h-2 rounded-full mt-1"
-                              style={{ background: randomColor }}
-                            />
-                            <span className="opacity-70">备注:</span>
-                            <span className="font-bold">{food.remarks}</span>
-                          </div>
-                        )}
-                      </div>
+                      <FoodCard 
+                        food={food} 
+                        user={user} 
+                        onEdit={() => {}} 
+                        onDelete={() => {}} 
+                        onLike={handleLikeFood} 
+                        onComment={handleCommentFood} 
+                      />
                     </div>
                   );
                 })}
