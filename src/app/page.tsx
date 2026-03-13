@@ -8,7 +8,10 @@ import SubwayMap from "@/components/subway-map";
 import StationSidebar from "@/components/station-sidebar";
 import AllFoodsList from "@/components/all-foods-list";
 import { FoodPattern } from "@/components/food-pattern";
-import { Sparkles } from "lucide-react";
+import { Sparkles, User, LogOut } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import "@/styles/memphis-theme.css";
 
 export default function Home() {
@@ -18,6 +21,7 @@ export default function Home() {
   const [showAllFoods, setShowAllFoods] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isUsingFirebase, setIsUsingFirebase] = useState(false);
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
     const useFirebase = firebaseStorage.isAvailable();
@@ -143,6 +147,68 @@ export default function Home() {
                     探索城市美味，发现惊喜
                   </p>
                 </div>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                {user ? (
+                  <div className="flex items-center gap-2">
+                    <div 
+                      className="memphis-card p-2"
+                      style={{ 
+                        background: "#98D9C2", 
+                        transform: "rotate(-2deg)"
+                      }}
+                    >
+                      <User size={20} style={{ color: "#2C2C2C" }} />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="font-bold text-sm md:text-base">
+                        {user.displayName || user.email}
+                      </span>
+                      {user.role === 'developer' && (
+                        <span className="text-xs font-bold text-#FF6B6B">开发者</span>
+                      )}
+                    </div>
+                    <Button
+                      onClick={() => signOut()}
+                      className="memphis-card"
+                      style={{ 
+                        background: "#C3B1E1", 
+                        transform: "rotate(1deg)"
+                      }}
+                    >
+                      <LogOut size={16} />
+                    </Button>
+                    {user.role === 'developer' && (
+                      <Link href="/admin">
+                        <div 
+                          className="memphis-card p-2 cursor-pointer"
+                          style={{ 
+                            background: "#FF6B6B", 
+                            transform: "rotate(-1deg)"
+                          }}
+                        >
+                          <span className="font-bold text-sm">管理后台</span>
+                        </div>
+                      </Link>
+                    )}
+                  </div>
+                ) : (
+                  <Link href="/auth">
+                    <div 
+                      className="memphis-card p-3 cursor-pointer"
+                      style={{ 
+                        background: "#F7DC6F", 
+                        transform: "rotate(1deg)"
+                      }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <User size={18} style={{ color: "#2C2C2C" }} />
+                        <span className="font-bold text-sm">登录/注册</span>
+                      </div>
+                    </div>
+                  </Link>
+                )}
               </div>
             </div>
 

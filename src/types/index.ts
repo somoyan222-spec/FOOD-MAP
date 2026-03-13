@@ -20,6 +20,40 @@ export type PriceRange =
   | "100-200元"
   | "200元以上";
 
+// 用户角色
+export type UserRole = 'user' | 'developer';
+
+// 用户信息
+export interface User {
+  id: string;
+  email: string;
+  displayName: string;
+  photoURL: string;
+  role: UserRole;
+  createdAt: string;
+}
+
+// 评论信息
+export interface Comment {
+  id: string;
+  foodId: string;
+  userId: string;
+  userName: string;
+  content: string;
+  createdAt: string;
+  replies: Reply[];
+}
+
+// 评论回复
+export interface Reply {
+  id: string;
+  commentId: string;
+  userId: string;
+  userName: string;
+  content: string;
+  createdAt: string;
+}
+
 // 美食信息
 export interface FoodItem {
   id: string;
@@ -31,6 +65,13 @@ export interface FoodItem {
   recommendedDish: string;
   remarks: string;
   distance: number; // 米
+  userId: string; // 添加用户ID
+  userName: string; // 添加用户名
+  createdAt: string;
+  updatedAt: string;
+  likes: number;
+  likedBy: string[]; // 点赞用户ID
+  comments: Comment[];
 }
 
 // 地铁站点（规则布局位置）
@@ -55,6 +96,9 @@ export interface SubwayLine {
 export interface AppData {
   version?: string;
   lines: SubwayLine[];
+  users?: {
+    [userId: string]: User;
+  };
 }
 
 // 站点统计信息
@@ -72,4 +116,11 @@ export interface LineStats {
   avgRating: number;
   maxRating: number;
   bestFood?: FoodItem;
+}
+
+// 认证状态
+export interface AuthState {
+  user: User | null;
+  isLoading: boolean;
+  error: string | null;
 }

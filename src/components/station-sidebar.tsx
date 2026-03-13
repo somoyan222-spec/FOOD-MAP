@@ -7,6 +7,7 @@ import { firebaseStorage } from "@/lib/firebase-storage";
 import FoodCard from "./food-card";
 import FoodForm from "./food-form";
 import { Plus, X, MapPin } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 type SortOption = "default" | "rating-desc" | "rating-asc";
 
@@ -29,6 +30,7 @@ export default function StationSidebar({
   const [currentFoods, setCurrentFoods] = useState<FoodItem[]>([]);
   const [lineColor, setLineColor] = useState<string>('#f97316');
   const [lineName, setLineName] = useState<string>('');
+  const { user } = useAuth();
 
   useEffect(() => {
     const available = firebaseStorage.isAvailable();
@@ -105,11 +107,18 @@ export default function StationSidebar({
     };
   }, [foods]);
 
-  const handleAddFood = async (foodData: Omit<FoodItem, "id" | "stationId">) => {
+  const handleAddFood = async (foodData: Omit<FoodItem, "id" | "stationId" | "userId" | "userName" | "createdAt" | "updatedAt" | "likes" | "likedBy" | "comments">) => {
     const newFood: FoodItem = {
       ...foodData,
       id: `food-${Date.now()}`,
       stationId: station!.id,
+      userId: user?.id || "anonymous",
+      userName: user?.displayName || user?.email || "匿名用户",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      likes: 0,
+      likedBy: [],
+      comments: [],
     };
 
     if (isUsingFirebase) {
@@ -136,13 +145,19 @@ export default function StationSidebar({
     onDataChange();
   };
 
-  const handleEditFood = async (foodData: Omit<FoodItem, "id" | "stationId">) => {
+  const handleEditFood = async (foodData: Omit<FoodItem, "id" | "stationId" | "userId" | "userName" | "createdAt" | "updatedAt" | "likes" | "likedBy" | "comments">) => {
     if (!editingFood) return;
 
+    // 检查是否是自己的美食卡片或开发者
+    if (editingFood.userId !== user?.id && user?.role !== 'developer') {
+      alert('只能修改自己添加的美食卡片');
+      return;
+    }
+
     const updatedFood: FoodItem = {
+      ...editingFood,
       ...foodData,
-      id: editingFood.id,
-      stationId: station!.id,
+      updatedAt: new Date().toISOString(),
     };
 
     if (isUsingFirebase) {
@@ -178,6 +193,13 @@ export default function StationSidebar({
   const handleDeleteFood = async (foodId: string) => {
     if (!confirm("确定要删除这个美食吗？")) return;
 
+    // 检查是否是自己的美食卡片或开发者
+    const food = currentFoods.find(f => f.id === foodId);
+    if (food && food.userId !== user?.id && user?.role !== 'developer') {
+      alert('只能删除自己添加的美食卡片');
+      return;
+    }
+
     if (isUsingFirebase) {
       await firebaseStorage.deleteFood(station!.lineId, station!.id, foodId);
     } else {
@@ -201,6 +223,70 @@ export default function StationSidebar({
 
     window.dispatchEvent(new CustomEvent('food-data-changed'));
     onDataChange();
+  };
+
+  const handleLikeFood = async (foodId: string) => {
+    if (!user && !localStorage.getItem('guestId')) {
+      // 为游客生成一个临时ID
+      const guestId = 'guest_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+      localStorage.setItem('guestId', guestId);
+    }
+
+    const userId = user?.id || localStorage.getItem('guestId') || 'anonymous';
+
+    if (isUsingFirebase) {
+      // 这里需要在firebase-storage.ts中实现点赞功能
+      // 暂时使用本地存储实现
+    } else {
+      const data = storage.getData();
+      const lineIndex = data.lines.findIndex((l) => l.id === station!.lineId);
+      if (lineIndex >= 0) {
+        const stationIndex = data.lines[lineIndex].stations.findIndex(
+          (s) => s.id === station!.id
+        );
+        if (stationIndex >= 0) {
+          if (!data.lines[lineIndex].stations[stationIndex].foods) {
+            data.lines[lineIndex].stations[stationIndex].foods = [];
+          }
+          const foodIndex = data.lines[lineIndex].stations[
+            stationIndex
+          ].foods.findIndex((f) => f.id === foodId);
+          if (foodIndex >= 0) {
+            const food = data.lines[lineIndex].stations[stationIndex].foods[foodIndex];
+            
+            // 确保likes和likedBy字段存在
+            if (!food.likes) food.likes = 0;
+            if (!food.likedBy) food.likedBy = [];
+            
+            // 检查用户是否已经点赞
+            const isLiked = food.likedBy.includes(userId);
+            
+            if (isLiked) {
+              // 取消点赞
+              food.likes = Math.max(0, food.likes - 1);
+              food.likedBy = food.likedBy.filter(id => id !== userId);
+            } else {
+              // 添加点赞
+              food.likes += 1;
+              food.likedBy.push(userId);
+            }
+            
+            storage.saveData(data);
+            setDataVersion(prev => prev + 1);
+          }
+        }
+      }
+    }
+  };
+
+  const handleCommentFood = (foodId: string) => {
+    if (!user) {
+      alert('请先登录后再评论');
+      return;
+    }
+    
+    // 这里可以打开评论对话框
+    alert('评论功能开发中...');
   };
 
   if (!station) {
@@ -264,13 +350,20 @@ export default function StationSidebar({
         </div>
 
         <div className="mt-4 flex items-center gap-3">
-          <button
-            onClick={() => setShowForm(true)}
-            className="flex-1 flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white py-2.5 px-4 rounded-lg font-medium transition-colors"
-          >
-            <Plus className="w-5 h-5" />
-            添加美食
-          </button>
+          {user ? (
+            <button
+              onClick={() => setShowForm(true)}
+              className="flex-1 flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white py-2.5 px-4 rounded-lg font-medium transition-colors"
+            >
+              <Plus className="w-5 h-5" />
+              添加美食
+            </button>
+          ) : (
+            <div className="flex-1 flex items-center justify-center gap-2 bg-gray-200 text-gray-500 py-2.5 px-4 rounded-lg font-medium">
+              <Plus className="w-5 h-5" />
+              登录后添加美食
+            </div>
+          )}
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as SortOption)}
@@ -297,11 +390,14 @@ export default function StationSidebar({
             <FoodCard
               key={food.id}
               food={food}
+              user={user}
               onEdit={() => {
                 setEditingFood(food);
                 setShowForm(true);
               }}
               onDelete={() => handleDeleteFood(food.id)}
+              onLike={handleLikeFood}
+              onComment={handleCommentFood}
             />
           ))
         )}

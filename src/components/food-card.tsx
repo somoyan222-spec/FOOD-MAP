@@ -1,18 +1,23 @@
 "use client";
 
 import { FoodItem } from "@/types";
-import { Star, MapPin, Utensils, DollarSign, Edit2, Trash2 } from "lucide-react";
+import { Star, MapPin, Utensils, DollarSign, Edit2, Trash2, ThumbsUp, MessageCircle, Heart } from "lucide-react";
+
+import { User } from "@/types";
 
 interface FoodCardProps {
   food: FoodItem;
+  user: User | null;
   onEdit: (food: FoodItem) => void;
   onDelete: (foodId: string) => void;
+  onLike: (foodId: string) => void;
+  onComment: (foodId: string) => void;
 }
 
 const colors = ["#98D9C2", "#FF6B6B", "#C3B1E1", "#F7DC6F", "#87CEEB", "#FFB6C1"];
 const rotations = [-3, -2, -1, 0, 1, 2, 3];
 
-export default function FoodCard({ food, onEdit, onDelete }: FoodCardProps) {
+export default function FoodCard({ food, user, onEdit, onDelete, onLike, onComment }: FoodCardProps) {
   const randomColor = colors[Math.floor(Math.random() * colors.length)];
   const randomRotation = rotations[Math.floor(Math.random() * rotations.length)];
   const accentColor = colors[Math.floor(Math.random() * colors.length)];
@@ -32,6 +37,12 @@ export default function FoodCard({ food, onEdit, onDelete }: FoodCardProps) {
       </div>
     );
   };
+
+  // 检查是否是自己的美食卡片或开发者
+  const isOwner = user?.id === food.userId || user?.role === 'developer';
+  
+  // 检查用户是否已经点赞
+  const isLiked = food.likedBy?.includes(user?.id || '') || false;
 
   return (
     <div 
@@ -56,35 +67,40 @@ export default function FoodCard({ food, onEdit, onDelete }: FoodCardProps) {
             {renderStars(food.rating)}
             <span className="text-sm font-bold opacity-70">{food.rating}.0</span>
           </div>
+          <div className="text-xs text-gray-500 mt-1">
+            添加者: {food.userName}
+          </div>
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => onEdit(food)}
-            className="memphis-button"
-            style={{ 
-              background: "#98D9C2",
-              padding: "8px",
-              minWidth: "36px",
-              height: "36px"
-            }}
-            title="编辑"
-          >
-            <Edit2 size={16} />
-          </button>
-          <button
-            onClick={() => onDelete(food.id)}
-            className="memphis-button"
-            style={{ 
-              background: "#FF6B6B",
-              padding: "8px",
-              minWidth: "36px",
-              height: "36px"
-            }}
-            title="删除"
-          >
-            <Trash2 size={16} />
-          </button>
-        </div>
+        {isOwner && (
+          <div className="flex gap-2">
+            <button
+              onClick={() => onEdit(food)}
+              className="memphis-button"
+              style={{ 
+                background: "#98D9C2",
+                padding: "8px",
+                minWidth: "36px",
+                height: "36px"
+              }}
+              title="编辑"
+            >
+              <Edit2 size={16} />
+            </button>
+            <button
+              onClick={() => onDelete(food.id)}
+              className="memphis-button"
+              style={{ 
+                background: "#FF6B6B",
+                padding: "8px",
+                minWidth: "36px",
+                height: "36px"
+              }}
+              title="删除"
+            >
+              <Trash2 size={16} />
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="flex flex-wrap gap-2 mb-4">
@@ -127,6 +143,25 @@ export default function FoodCard({ food, onEdit, onDelete }: FoodCardProps) {
           </p>
         </div>
       )}
+
+      <div className="mt-4 flex items-center gap-4 pt-4 border-t-2 border-black border-dashed">
+        <button
+          onClick={() => onLike(food.id)}
+          className="flex items-center gap-2 text-sm font-bold transition-colors hover:scale-105"
+          style={{ color: isLiked ? "#FF6B6B" : "#2C2C2C" }}
+        >
+          {isLiked ? <Heart size={18} fill="#FF6B6B" /> : <ThumbsUp size={18} />}
+          <span>{food.likes || 0}</span>
+        </button>
+        <button
+          onClick={() => onComment(food.id)}
+          className="flex items-center gap-2 text-sm font-bold transition-colors hover:scale-105"
+          style={{ color: "#2C2C2C" }}
+        >
+          <MessageCircle size={18} />
+          <span>{food.comments?.length || 0}</span>
+        </button>
+      </div>
     </div>
   );
 }

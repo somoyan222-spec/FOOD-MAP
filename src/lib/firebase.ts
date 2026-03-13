@@ -1,8 +1,10 @@
 import { initializeApp, FirebaseApp, getApps, getApp } from "firebase/app";
 import { getDatabase, Database } from "firebase/database";
+import { getAuth, Auth } from "firebase/auth";
 
 let app: FirebaseApp | null = null;
 let database: Database | null = null;
+let auth: Auth | null = null;
 
 // 硬编码 Firebase 配置（临时解决方案）
 const firebaseConfig = {
@@ -16,16 +18,14 @@ const firebaseConfig = {
 };
 
 export const isConfigured = () => {
-  return !!(
-    firebaseConfig.apiKey &&
+  return !!(firebaseConfig.apiKey &&
     firebaseConfig.databaseURL &&
-    firebaseConfig.projectId
-  );
+    firebaseConfig.projectId);
 };
 
 export const getFirebase = () => {
   if (typeof window === "undefined") {
-    return { app: null, database: null };
+    return { app: null, database: null, auth: null };
   }
 
   try {
@@ -44,10 +44,15 @@ export const getFirebase = () => {
       console.log("Firebase database initialized");
     }
 
-    return { app, database };
+    if (!auth && app) {
+      auth = getAuth(app);
+      console.log("Firebase auth initialized");
+    }
+
+    return { app, database, auth };
   } catch (error) {
     console.error("Firebase initialization error:", error);
-    return { app: null, database: null };
+    return { app: null, database: null, auth: null };
   }
 };
 
