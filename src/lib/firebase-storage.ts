@@ -54,19 +54,47 @@ export const firebaseStorage = {
     console.log("Subscribing to Firebase data...");
     const dataRef = ref(database, DATA_REF);
     
-    const unsubscribe = onValue(dataRef, (snapshot) => {
-      console.log("Firebase data changed");
+    // 先获取一次数据
+    get(dataRef).then((snapshot) => {
+      console.log("Initial Firebase data fetch:");
       if (snapshot.exists()) {
         const data = snapshot.val() as AppData;
+        console.log("Got initial data from Firebase:", data);
+        console.log("Firebase data version:", data.version);
+        console.log("Local data version:", DATA_VERSION);
+        
+        // 即使版本不匹配，也使用Firebase上的数据
+        if (!data.version || data.version !== DATA_VERSION) {
+          console.log("Data version mismatch, but using Firebase data anyway");
+        }
         callback(data);
       } else {
         console.log("No data in Firebase, setting default data");
         set(dataRef, initialData);
         callback(initialData);
       }
+    }).catch((error) => {
+      console.error("Error fetching initial Firebase data:", error);
+      callback(initialData);
     });
     
-    return () => off(dataRef);
+    // 然后订阅数据变化
+    const unsubscribe = onValue(dataRef, (snapshot) => {
+      console.log("Firebase data changed:");
+      if (snapshot.exists()) {
+        const data = snapshot.val() as AppData;
+        console.log("Got updated data from Firebase:", data);
+        callback(data);
+      } else {
+        console.log("No data in Firebase, setting default data");
+        set(dataRef, initialData);
+        callback(initialData);
+      }
+    }, (error) => {
+      console.error("Error in Firebase subscription:", error);
+    });
+    
+    return unsubscribe;
   },
 
   async saveData(data: AppData): Promise<void> {
