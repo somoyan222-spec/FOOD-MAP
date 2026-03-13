@@ -148,8 +148,14 @@ export default function StationSidebar({
   const handleEditFood = async (foodData: Omit<FoodItem, "id" | "stationId" | "userId" | "userName" | "createdAt" | "updatedAt" | "likes" | "likedBy" | "comments">) => {
     if (!editingFood) return;
 
+    // 检查用户是否已登录
+    if (!user) {
+      alert('请先登录后再编辑美食卡片');
+      return;
+    }
+
     // 检查是否是自己的美食卡片或开发者
-    if (editingFood.userId !== user?.id && user?.role !== 'developer') {
+    if (editingFood.userId !== user.id && user.role !== 'developer') {
       alert('只能修改自己添加的美食卡片');
       return;
     }
@@ -193,9 +199,15 @@ export default function StationSidebar({
   const handleDeleteFood = async (foodId: string) => {
     if (!confirm("确定要删除这个美食吗？")) return;
 
+    // 检查用户是否已登录
+    if (!user) {
+      alert('请先登录后再删除美食卡片');
+      return;
+    }
+
     // 检查是否是自己的美食卡片或开发者
     const food = currentFoods.find(f => f.id === foodId);
-    if (food && food.userId !== user?.id && user?.role !== 'developer') {
+    if (food && food.userId !== user.id && user.role !== 'developer') {
       alert('只能删除自己添加的美食卡片');
       return;
     }

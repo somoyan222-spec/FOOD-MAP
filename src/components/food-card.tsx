@@ -40,8 +40,10 @@ export default function FoodCard({ food, user, onEdit, onDelete, onLike, onAddCo
     );
   };
 
+  // 检查是否已登录
+  const isLoggedIn = !!user;
   // 检查是否是自己的美食卡片或开发者
-  const isOwner = user?.id === food.userId || user?.role === 'developer';
+  const isOwner = isLoggedIn && (user?.id === food.userId || user?.role === 'developer');
   
   // 检查用户是否已经点赞
   const isLiked = food.likedBy?.includes(user?.id || '') || false;
