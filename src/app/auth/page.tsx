@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, Mail } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ import { CardFooter } from '@/components/ui/card';
 import { CardHeader } from '@/components/ui/card';
 import { CardTitle } from '@/components/ui/card';
 import { FoodPattern } from '@/components/food-pattern';
+import { useRouter } from 'next/navigation';
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -21,7 +22,15 @@ export default function AuthPage() {
   const [displayName, setDisplayName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   
-  const { signUp, signIn, signInWithGoogle, isLoading, error } = useAuth();
+  const { user, signUp, signIn, signInWithGoogle, isLoading, error } = useAuth();
+  const router = useRouter();
+  
+  // 当用户登录成功后跳转到主页
+  useEffect(() => {
+    if (user) {
+      router.push('/');
+    }
+  }, [user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
