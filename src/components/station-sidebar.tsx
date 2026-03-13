@@ -226,6 +226,10 @@ export default function StationSidebar({
   };
 
   const handleLikeFood = async (foodId: string) => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
     if (!user && !localStorage.getItem('guestId')) {
       // 为游客生成一个临时ID
       const guestId = 'guest_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
@@ -279,14 +283,52 @@ export default function StationSidebar({
     }
   };
 
-  const handleCommentFood = (foodId: string) => {
+  const handleAddComment = async (foodId: string, content: string) => {
     if (!user) {
       alert('请先登录后再评论');
       return;
     }
-    
-    // 这里可以打开评论对话框
-    alert('评论功能开发中...');
+
+    if (!station) return;
+
+    const newComment = {
+      id: `comment_${Date.now()}`,
+      foodId,
+      userId: user.id,
+      userName: user.displayName || user.email,
+      content,
+      createdAt: new Date().toISOString(),
+      likes: 0,
+      likedBy: [],
+      replies: []
+    };
+
+    if (isUsingFirebase) {
+      // Firebase实现（待添加）
+      console.log('Firebase评论功能待实现');
+    } else {
+      const data = storage.getData();
+      const lineIndex = data.lines.findIndex((l) => l.id === station.lineId);
+      if (lineIndex >= 0) {
+        const stationIndex = data.lines[lineIndex].stations.findIndex(
+          (s) => s.id === station.id
+        );
+        if (stationIndex >= 0) {
+          const foodIndex = data.lines[lineIndex].stations[stationIndex].foods?.findIndex(
+            (f) => f.id === foodId
+          );
+          if (foodIndex !== undefined && foodIndex >= 0) {
+            const food = data.lines[lineIndex].stations[stationIndex].foods![foodIndex];
+            if (!food.comments) {
+              food.comments = [];
+            }
+            food.comments.push(newComment);
+            storage.saveData(data);
+            setDataVersion(prev => prev + 1);
+          }
+        }
+      }
+    }
   };
 
   if (!station) {
@@ -397,7 +439,7 @@ export default function StationSidebar({
               }}
               onDelete={() => handleDeleteFood(food.id)}
               onLike={handleLikeFood}
-              onComment={handleCommentFood}
+              onAddComment={handleAddComment}
             />
           ))
         )}

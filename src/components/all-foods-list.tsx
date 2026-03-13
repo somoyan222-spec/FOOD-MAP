@@ -100,13 +100,59 @@ export default function AllFoodsList({ lines, onClose }: AllFoodsListProps) {
   };
   
   // 处理评论
-  const handleCommentFood = (foodId: string) => {
+  const handleAddComment = async (foodId: string, content: string) => {
     if (!user) {
       alert('请先登录后再评论');
       return;
     }
-    // 这里可以实现评论功能，例如打开评论模态框
-    alert('评论功能正在开发中');
+
+    const newComment = {
+      id: `comment_${Date.now()}`,
+      foodId,
+      userId: user.id,
+      userName: user.displayName || user.email,
+      content,
+      createdAt: new Date().toISOString(),
+      likes: 0,
+      likedBy: [],
+      replies: []
+    };
+
+    // 找到包含该美食的站点和线路
+    for (const line of lines) {
+      for (const station of line.stations || []) {
+        const foodIndex = (station.foods || []).findIndex(f => f.id === foodId);
+        if (foodIndex >= 0) {
+          const food = station.foods![foodIndex];
+          if (!food.comments) {
+            food.comments = [];
+          }
+          food.comments.push(newComment);
+
+          // 更新数据
+          if (isUsingFirebase) {
+            await firebaseStorage.updateFood(line.id, station.id, food);
+          } else {
+            const data = storage.getData();
+            const lineIndex = data.lines.findIndex(l => l.id === line.id);
+            if (lineIndex >= 0) {
+              const stationIndex = data.lines[lineIndex].stations.findIndex(s => s.id === station.id);
+              if (stationIndex >= 0) {
+                const foodIdx = data.lines[lineIndex].stations[stationIndex].foods?.findIndex(f => f.id === foodId);
+                if (foodIdx !== undefined && foodIdx >= 0) {
+                  data.lines[lineIndex].stations[stationIndex].foods![foodIdx] = food;
+                  storage.saveData(data);
+                }
+              }
+            }
+          }
+
+          // 触发数据更新
+          setDataVersion(prev => prev + 1);
+          return;
+        }
+      }
+    }
   };
 
   const allFoods = useMemo(() => {
@@ -341,7 +387,7 @@ export default function AllFoodsList({ lines, onClose }: AllFoodsListProps) {
                         onEdit={() => {}} 
                         onDelete={() => {}} 
                         onLike={handleLikeFood} 
-                        onComment={handleCommentFood} 
+                        onAddComment={handleAddComment} 
                       />
                     </div>
                   );
