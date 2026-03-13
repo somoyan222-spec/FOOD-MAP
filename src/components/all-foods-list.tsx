@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { SubwayLine, FoodItem, FoodCategory } from "@/types";
 import { FOOD_CATEGORIES } from "@/lib/data";
 import { X, Search, Sparkles } from "lucide-react";
